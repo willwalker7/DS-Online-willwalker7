@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Práctica Obligatoria SQL — Guía de Soluciones</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #f7f8fc;
+      --surface2: #edf0f7;
+      --border: #d8dde8;
+      --accent: #6c56f0;
+      --accent2: #0ea5e9;
+      --green: #16a34a;
+      --orange: #ea580c;
+      --red: #dc2626;
+      --yellow: #d97706;
+      --text: #1e2340;
+      --muted: #6b7280;
+      --sql-kw: #7c3aed;
+      --sql-fn: #2563eb;
+      --sql-str: #15803d;
+      --sql-op: #0891b2;
+      --py-kw: #7c3aed;
+      --py-fn: #2563eb;
+      --py-str: #15803d;
+      --py-comment: #9ca3af;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, #f0eeff 0%, #e8f4ff 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 2rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p { color: var(--muted); font-size: 0.9rem; margin-top: 0.25rem; }
+
+    /* ── LAYOUT ── */
+    .page { display: flex; max-width: 1400px; margin: 0 auto; }
+
+    /* ── SIDEBAR ── */
+    nav {
+      width: 260px;
+      min-width: 260px;
+      padding: 1.5rem 1rem;
+      position: sticky;
+      top: 80px;
+      height: calc(100vh - 80px);
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+    }
+    nav h3 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: 0.75rem; }
+    nav a {
+      display: block;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: all .15s;
+      border-left: 2px solid transparent;
+    }
+    nav a:hover { color: var(--text); background: var(--surface2); border-left-color: var(--accent); }
+    nav .section-label {
+      margin-top: 1rem;
+      margin-bottom: 0.25rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--accent);
+      padding-left: 0.75rem;
+    }
+
+    /* ── MAIN ── */
+    main {
+      flex: 1;
+      padding: 2rem 2.5rem;
+      max-width: 1100px;
+    }
+
+    /* ── EXERCISE CARD ── */
+    .exercise {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .exercise-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+    .exercise-num {
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 6px;
+      padding: 0.2rem 0.6rem;
+      white-space: nowrap;
+    }
+    .exercise-title { font-weight: 600; font-size: 1.05rem; flex: 1; }
+    .time-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      background: #fffbeb;
+      color: var(--yellow);
+      border: 1px solid #fcd34d;
+      border-radius: 20px;
+      padding: 0.25rem 0.75rem;
+      white-space: nowrap;
+    }
+
+    .exercise-body { padding: 1.5rem; }
+
+    /* ── ENUNCIADO ── */
+    .enunciado {
+      background: #f3f0ff;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 0.85rem 1.1rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+
+    /* ── EXPLANATION ── */
+    .explanation {
+      background: #e0f7ff;
+      border-left: 3px solid var(--accent2);
+      border-radius: 0 8px 8px 0;
+      padding: 0.85rem 1.1rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.92rem;
+    }
+    .explanation strong { color: var(--accent2); }
+
+    /* ── TABS ── */
+    .tabs { margin-top: 1rem; }
+    .tab-buttons { display: flex; gap: 0.5rem; margin-bottom: 0; }
+    .tab-btn {
+      padding: 0.45rem 1rem;
+      border-radius: 8px 8px 0 0;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      background: var(--surface2);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all .15s;
+    }
+    .tab-btn.active { background: #ffffff; color: var(--text); border-color: var(--accent); }
+    .tab-content { display: none; border: 1px solid var(--border); border-radius: 0 8px 8px 8px; overflow: hidden; }
+    .tab-content.active { display: block; }
+
+    /* ── CODE BLOCKS ── */
+    pre {
+      background: #f4f5ff;
+      padding: 1.1rem 1.25rem;
+      font-family: 'Consolas', 'Fira Code', monospace;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      overflow-x: auto;
+      tab-size: 4;
+    }
+    code { font-family: inherit; }
+
+    /* SQL syntax */
+    .kw  { color: var(--sql-kw); font-weight: 600; }
+    .fn  { color: var(--sql-fn); }
+    .str { color: var(--sql-str); }
+    .op  { color: var(--sql-op); }
+    .cm  { color: var(--py-comment); font-style: italic; }
+    .num { color: var(--orange); }
+
+    /* ── OUTPUT TABLE ── */
+    .output-wrap {
+      background: #f9fafc;
+      padding: 0.85rem 1.25rem;
+      overflow-x: auto;
+      border-top: 1px solid var(--border);
+    }
+    .output-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    table {
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      font-family: 'Consolas', monospace;
+    }
+    th {
+      background: var(--surface2);
+      color: var(--accent2);
+      padding: 0.4rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    td {
+      padding: 0.3rem 0.75rem;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    tr:nth-child(even) td { background: rgba(100,116,139,.05); }
+
+    /* ── CALLOUT ── */
+    .callout {
+      border-radius: 8px;
+      padding: 0.85rem 1.1rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    .callout.info { background: #eff6ff; border-left: 3px solid var(--sql-fn); }
+    .callout.tip  { background: #f0fdf4; border-left: 3px solid var(--green); }
+    .callout.warn { background: #fffbeb; border-left: 3px solid var(--yellow); }
+
+    /* ── SECTION DIVIDER ── */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 2.5rem 0 1.5rem;
+    }
+    .section-divider h2 {
+      font-size: 1.25rem;
+      white-space: nowrap;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .section-divider hr { flex: 1; border: none; border-top: 1px solid var(--border); }
+
+    /* ── ANSWER BLOCK (2.3, 2.9) ── */
+    .answer {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: 8px;
+      padding: 0.9rem 1.1rem;
+      font-size: 0.9rem;
+    }
+    .answer strong { color: var(--green); }
+
+    /* ── TOTAL TIME SUMMARY ── */
+    .summary-card {
+      background: linear-gradient(135deg, #f0eeff, #e8f4ff);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+    }
+    .summary-card h2 { font-size: 1rem; color: var(--accent); margin-bottom: 0.25rem; }
+    .summary-card .total { font-size: 2rem; font-weight: 700; color: var(--yellow); }
+    .time-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.5rem;
+      flex: 1;
+    }
+    .time-item {
+      background: rgba(108,86,240,.07);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+    }
+    .time-item .t-label { color: var(--muted); }
+    .time-item .t-val { color: var(--yellow); font-weight: 700; }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Práctica Obligatoria — SQL &amp; Pandas</h1>
+  <p>Base de datos Chinook · Sprint 06 · Guía de soluciones con explicaciones y tiempos de corrección</p>
+</header>
+
+<div class="page">
+
+  <!-- ── NAV ── -->
+  <nav>
+    <h3>Índice</h3>
+    <div class="section-label">Setup</div>
+    <a href="#ej0">Ejercicio 0 — Setup</a>
+
+    <div class="section-label">#1 Queries</div>
+    <a href="#ej11">1.1 — Canadá y Brasil</a>
+    <a href="#ej12">1.2 — DISTINCT países</a>
+    <a href="#ej13">1.3 — Clientes USA</a>
+
+    <div class="section-label">#2 JOINs</div>
+    <a href="#ej21">2.1 — LEFT JOIN canciones</a>
+    <a href="#inciso">Inciso — merge en Pandas</a>
+    <a href="#ej22">2.2 — Cargar DataFrames</a>
+    <a href="#ej23">2.3 — Preguntas merge</a>
+    <a href="#ej24">2.4 — Ejecutar merge</a>
+    <a href="#ej25">2.5 — Renombrar columnas</a>
+    <a href="#ej26">2.6 — Canciones por género</a>
+    <a href="#ej27">2.7 — Clientes Alemania</a>
+    <a href="#ej28">2.8 — Clientes Brasil</a>
+    <a href="#ej29">2.9 — SQL vs Pandas</a>
+
+    <div class="section-label">Extra</div>
+    <a href="#eje1">E1 — Triple JOIN</a>
+    <a href="#eje2">E2 — Norteamérica</a>
+  </nav>
+
+  <!-- ── MAIN ── -->
+  <main>
+
+    <!-- SUMMARY -->
+    <div class="summary-card">
+      <div>
+        <h2>Tiempo total estimado de corrección</h2>
+        <div class="total">~75 min</div>
+        <div style="color:var(--muted);font-size:0.8rem;">Ejercicios obligatorios: ~55 min · Extras: ~20 min</div>
+      </div>
+      <div class="time-grid">
+        <div class="time-item"><div class="t-label">Ej. 0 — Setup</div><div class="t-val">5 min</div></div>
+        <div class="time-item"><div class="t-label">1.1 — WHERE + IN</div><div class="t-val">5 min</div></div>
+        <div class="time-item"><div class="t-label">1.2 — DISTINCT</div><div class="t-val">3 min</div></div>
+        <div class="time-item"><div class="t-label">1.3 — GROUP BY</div><div class="t-val">5 min</div></div>
+        <div class="time-item"><div class="t-label">2.1 — LEFT JOIN</div><div class="t-val">5 min</div></div>
+        <div class="time-item"><div class="t-label">Inciso merge</div><div class="t-val">5 min</div></div>
+        <div class="time-item"><div class="t-label">2.2-2.5 — merge paso a paso</div><div class="t-val">8 min</div></div>
+        <div class="time-item"><div class="t-label">2.6 — COUNT + GROUP</div><div class="t-val">5 min</div></div>
+        <div class="time-item"><div class="t-label">2.7 — INNER JOIN</div><div class="t-val">7 min</div></div>
+        <div class="time-item"><div class="t-label">2.8 — INNER + COUNT</div><div class="t-val">5 min</div></div>
+        <div class="time-item"><div class="t-label">2.9 — Reflexión</div><div class="t-val">2 min</div></div>
+        <div class="time-item"><div class="t-label">E1 — JOIN triple</div><div class="t-val">8 min</div></div>
+        <div class="time-item"><div class="t-label">E2 — 4 JOINs</div><div class="t-val">12 min</div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════ EJERCICIO 0 ══════════════════════ -->
+    <div class="section-divider"><h2>Setup</h2><hr/></div>
+
+    <div class="exercise" id="ej0">
+      <div class="exercise-header">
+        <span class="exercise-num">Ejercicio 0</span>
+        <span class="exercise-title">Imports, conexión y función helper</span>
+        <span class="time-badge">⏱ 5 min</span>
+      </div>
+      <div class="exercise-body">
+
+        <div class="enunciado">
+          Importa los paquetes necesarios, conecta a <code>chinook.db</code> y crea una función que facilite la ejecución de queries.
+        </div>
+
+        <div class="explanation">
+          <strong>Explicación:</strong> Este ejercicio es puro boilerplate pero sienta las bases del notebook. Hay dos formas válidas de crear la función helper: usando el <em>cursor</em> directamente (más manual) o usando <code>pd.read_sql</code> (más limpio y directo). Ambas son correctas; en el curso se usan las dos para ver la diferencia. El flag <code>copy_on_write=True</code> prepara Pandas para el comportamiento por defecto de la versión 3.0.
+        </div>
+
+        <div class="callout tip" style="margin-top:1rem;">
+          <strong>¿Qué es un <code>cursor</code>?</strong><br/>
+          Cuando Python se conecta a una base de datos, la <strong>conexión</strong> (<code>conn</code>) es el canal de comunicación — como abrir la puerta a la BD. El <strong>cursor</strong> es el puntero que se mueve por ese canal para enviar comandos y leer resultados fila a fila.<br/><br/>
+          Puedes imaginarlo como un cursor de texto en un editor: la conexión es el documento abierto, y el cursor es donde ocurre la acción. Cada vez que llamas a <code>cursor.execute(query)</code> mandas una instrucción SQL; con <code>cursor.fetchall()</code> recoges todas las filas devueltas; con <code>cursor.description</code> obtienes los nombres de las columnas.<br/><br/>
+          Una misma conexión puede tener varios cursores abiertos a la vez, lo que permite ejecutar queries independientes en paralelo sin interferencia.
+        </div>
+
+        <div class="callout tip" style="margin-top:0.75rem;">
+          <strong>¿Por qué <code>sqlite3</code> y no otro motor?</strong><br/>
+          <code>sqlite3</code> viene incluido en la librería estándar de Python — no hay que instalar nada. SQLite guarda toda la base de datos en un único fichero <code>.db</code>, lo que lo hace ideal para prácticas, prototipos y proyectos pequeños: sin servidor, sin configuración, sin permisos de red.<br/><br/>
+          En producción se usan motores como <strong>PostgreSQL</strong> o <strong>MySQL</strong>, que soportan múltiples usuarios concurrentes, mayor volumen de datos y más funcionalidades avanzadas. La sintaxis SQL que aprenderéis aquí es prácticamente idéntica en todos ellos; la única diferencia notable con SQLite es que algunas funciones de cadena o fecha cambian de nombre.
+        </div>
+
+        <div class="tabs">
+          <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab(this,'ej0-python')">Python</button>
+          </div>
+          <div class="tab-content active" id="ej0-python">
+<pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> sqlite3
+
+pd.options.mode.copy_on_write = <span class="kw">True</span>  <span class="cm"># CoW por defecto en Pandas 3.0+</span>
+
+<span class="cm"># Conexión a la base de datos</span>
+conn = sqlite3.connect(<span class="str">"./data/chinook.db"</span>)
+cursor_ejer = conn.cursor()
+
+<span class="cm"># Opción 1 — con cursor</span>
+<span class="kw">def</span> <span class="fn">sql_query</span>(query):
+    cursor_ejer.execute(query)
+    resultado = cursor_ejer.fetchall()
+    columnas = [d[<span class="num">0</span>] <span class="kw">for</span> d <span class="kw">in</span> cursor_ejer.description]
+    <span class="kw">return</span> pd.DataFrame(resultado, columns=columnas)
+
+<span class="cm"># Opción 2 — con pd.read_sql (más recomendable)</span>
+<span class="kw">def</span> <span class="fn">sql_query</span>(query):
+    <span class="kw">return</span> pd.read_sql(query, conn)</code></pre>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <strong>Punto clave en corrección:</strong> Que exista la función helper (de cualquiera de las dos formas) y que la conexión use la ruta correcta.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════ SECCIÓN 1 ══════════════════════ -->
+    <div class="section-divider"><h2>#1 Queries básicas</h2><hr/></div>
+
+    <!-- 1.1 -->
+    <div class="exercise" id="ej11">
+      <div class="exercise-header">
+        <span class="exercise-num">1.1</span>
+        <span class="exercise-title">Clientes de Canadá y Brasil</span>
+        <span class="time-badge">⏱ 5 min</span>
+      </div>
+      <div class="exercise-body">
+
+        <div class="enunciado">
+          Muestra nombre completo, <code>CustomerId</code> y país de los clientes de Canadá y Brasil.
+        </div>
+
+        <div class="explanation">
+          <strong>Conceptos clave:</strong>
+          <ul style="margin-top:0.5rem; padding-left:1.25rem;">
+            <li><strong>WHERE … IN (…)</strong>: filtra filas cuyo valor esté dentro de una lista. Equivalente a dos condiciones unidas por OR.</li>
+            <li><strong>Concatenación con <code>||</code></strong>: en SQLite se usa <code>campo1 || ' ' || campo2</code> para unir cadenas (en otros gestores existe <code>CONCAT()</code>).</li>
+            <li><strong>Pandas:</strong> <code>isin()</code> es el equivalente de <code>IN</code>; para concatenar columnas se usa el operador <code>+</code> sobre strings.</li>
+          </ul>
+        </div>
+
+        <div class="tabs">
+          <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab(this,'ej11-sql')">SQL</button>
+            <button class="tab-btn" onclick="switchTab(this,'ej11-pandas')">Pandas</button>
+          </div>
+          <div class="tab-content active" id="ej11-sql">
+<pre><code><span class="kw">SELECT</span>
+    FirstName <span class="op">||</span> <span class="str">' '</span> <span class="op">||</span> LastName <span class="kw">AS</span> Nombre_Completo,
+    CustomerId,
+    Country
+<span class="kw">FROM</span> customers
+<span class="kw">WHERE</span> Country <span class="kw">IN</span> (<span class="str">"Canada"</span>, <span class="str">"Brazil"</span>)</code></pre>
+            <div class="output-wrap">
+              <div class="output-label">Resultado (13 filas)</div>
+              <table>
+                <tr><th>Nombre_Completo</th><th>CustomerId</th><th>Country</th></tr>
+                <tr><td>Luís Gonçalves</td><td>1</td><td>Brazil</td></tr>
+                <tr><td>François Tremblay</td><td>3</td><td>Canada</td></tr>
+                <tr><td>Eduardo Martins</td><td>10</td><td>Brazil</td></tr>
+                <tr><td>Alexandre Rocha</td><td>11</td><td>Brazil</td></tr>
+                <tr><td>Roberto Almeida</td><td>12</td><td>Brazil</td></tr>
+                <tr><td>Fernanda Ramos</td><td>13</td><td>Brazil</td></tr>
+                <tr><td>Mark Philips</td><td>14</td><td>Canada</td></tr>
+                <tr><td>Jennifer Peterson</td><td>15</td><td>Canada</td></tr>
+                <tr><td colspan="3" style="color:var(--muted);text-align:center">… 5 filas más</td></tr>
+              </table>
+            </div>
+          </div>
+          <div class="tab-content" id="ej11-pandas">
+<pre><code>df = sql_query(<span class="str">"SELECT * FROM customers"</span>)
+
+df[<span class="str">"Nombre_Completo"</span>] = df[<span class="str">"FirstName"</span>] + <span class="str">" "</span> + df[<span class="str">"LastName"</span>]
+
+df.loc[df.Country.isin([<span class="str">"Canada"</span>, <span class="str">"Brazil"</span>]),
+       [<span class="str">"Nombre_Completo"</span>, <span class="str">"CustomerId"</span>, <span class="str">"Country"</span>]]</code></pre>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <strong>Punto clave en corrección:</strong> Que use <code>IN</code> (o el equivalente <code>isin</code>) y que concatene correctamente el nombre. El orden de las columnas en el SELECT y la existencia del alias son secundarios.
+        </div>
+      </div>
+    </div>
+
+    <!-- 1.2 -->
+    <div class="exercise" id="ej12">
+      <div class="exercise-header">
+        <span class="exercise-num">1.2</span>
+        <span class="exercise-title">Lista de países facturados (sin repetir)</span>
+        <span class="time-badge">⏱ 3 min</span>
+      </div>
+      <div class="exercise-body">
+
+        <div class="enunciado">
+          Muestra una lista de países a los que se ha facturado, sin repetidos. Las facturas están en la tabla <code>invoices</code>.
+        </div>
+
+        <div class="explanation">
+          <strong>Conceptos clave:</strong>
+          <ul style="margin-top:0.5rem; padding-left:1.25rem;">
+            <li><strong>DISTINCT</strong>: elimina filas duplicadas del resultado. Se aplica al conjunto completo de columnas seleccionadas.</li>
+            <li><strong>Pandas:</strong> dos alternativas: <code>.unique()</code> devuelve un array; <code>.drop_duplicates()</code> devuelve un DataFrame (más versátil cuando hay varias columnas).</li>
+          </ul>
+        </div>
+
+        <div class="tabs">
+          <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab(this,'ej12-sql')">SQL</button>
+            <button class="tab-btn" onclick="switchTab(this,'ej12-pandas')">Pandas</button>
+          </div>
+          <div class="tab-content active" id="ej12-sql">
+<pre><code><span class="kw">SELECT DISTINCT</span> BillingCountry
+<span class="kw">FROM</span> invoices</code></pre>
+            <div class="output-wrap">
+              <div class="output-label">Resultado (24 países)</div>
+              <table>
+                <tr><th>BillingCountry</th></tr>
+                <tr><td>Germany</td></tr>
+                <tr><td>Norway</td></tr>
+                <tr><td>Belgium</td></tr>
+                <tr><td>Canada</td></tr>
+                <tr><td colspan="1" style="color:var(--muted);text-align:center">… 20 países más</td></tr>
+              </table>
+            </div>
+          </div>
+          <div class="tab-content" id="ej12-pandas">
+<pre><code>df = sql_query(<span class="str">"SELECT * FROM invoices"</span>)
+
+<span class="cm"># Opción 1 — array</span>
+df[<span class="str">"BillingCountry"</span>].unique()
+
+<span class="cm"># Opción 2 — DataFrame (más parecido al resultado SQL)</span>
+df[[<span class="str">"BillingCountry"</span>]].drop_duplicates().reset_index(drop=<span class="kw">True</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <strong>Punto clave en corrección:</strong> El único requisito es que no haya países repetidos. Cualquiera de las dos opciones Pandas es válida.
+        </div>
+      </div>
+    </div>
+
+    <!-- 1.3 -->
+    <div class="exercise" id="ej13">
+      <div class="exercise-header">
+        <span class="exercise-num">1.3</span>
+        <span class="exercise-title">Clientes de USA por estado (COUNT + GROUP BY)</span>
+        <span class="time-badge">⏱ 5 min</span>
+      </div>
+      <div class="exercise-body">
+
+        <div class="enunciado">
+          Muestra cuántos clientes de Estados Unidos hay por estado, ordenado de mayor a menor.
+        </div>
+
+        <div class="explanation">
+          <strong>Conceptos clave:</strong>
+          <ul style="margin-top:0.5rem; padding-left:1.25rem;">
+            <li><strong>GROUP BY + COUNT</strong>: agrupa las filas por un campo y cuenta cuántas hay en cada grupo. <code>COUNT(1)</code> es equivalente a <code>COUNT(*)</code> — ver explicación detallada abajo.</li>
+            <li><strong>ORDER BY</strong>: en SQLite podemos usar la posición numérica de la columna (<code>ORDER BY 2 DESC</code>) o su alias si le hemos dado uno.</li>
+            <li><strong>Pandas:</strong> <code>.groupby()</code> + <code>.count()</code> + <code>.sort_values(ascending=False)</code>.</li>
+          </ul>
+        </div>
+
+        <div class="callout info">
+          <strong>💡 ¿Por qué COUNT(1) o COUNT(*) y no COUNT(columna)?</strong>
+          <p style="margin-top:0.6rem;">En SQL hay tres formas habituales de contar, y no son idénticas:</p>
+          <table style="margin-top:0.75rem; width:100%; font-size:0.85rem; border-collapse:collapse;">
+            <tr>
+              <th style="text-align:left; padding:0.4rem 0.75rem; border-bottom:2px solid var(--border); color:var(--sql-fn);">Forma</th>
+              <th style="text-align:left; padding:0.4rem 0.75rem; border-bottom:2px solid var(--border); color:var(--sql-fn);">Qué cuenta</th>
+              <th style="text-align:left; padding:0.4rem 0.75rem; border-bottom:2px solid var(--border); color:var(--sql-fn);">¿Ignora NULLs?</th>
+            </tr>
+            <tr>
+              <td style="padding:0.35rem 0.75rem; border-bottom:1px solid var(--border);"><code>COUNT(*)</code></td>
+              <td style="padding:0.35rem 0.75rem; border-bottom:1px solid var(--border);">Todas las filas del grupo, sin excepción</td>
+              <td style="padding:0.35rem 0.75rem; border-bottom:1px solid var(--border);">No — cuenta incluso las filas con NULLs en cualquier columna</td>
+            </tr>
+            <tr>
+              <td style="padding:0.35rem 0.75rem; border-bottom:1px solid var(--border);"><code>COUNT(1)</code></td>
+              <td style="padding:0.35rem 0.75rem; border-bottom:1px solid var(--border);">Evalúa el literal <code>1</code> por cada fila — siempre distinto de NULL</td>
+              <td style="padding:0.35rem 0.75rem; border-bottom:1px solid var(--border);">No — idéntico en la práctica a <code>COUNT(*)</code></td>
+            </tr>
+            <tr>
+              <td style="padding:0.35rem 0.75rem;"><code>COUNT(columna)</code></td>
+              <td style="padding:0.35rem 0.75rem;">Solo los valores no nulos de esa columna</td>
+              <td style="padding:0.35rem 0.75rem;">Sí — si la columna tiene NULLs, el resultado será menor</td>
+            </tr>
+          </table>
+          <p style="margin-top:0.85rem;">
+            En este ejercicio queremos contar <strong>cuántos clientes hay por estado</strong>, es decir, simplemente cuántas filas pertenecen a cada grupo — independientemente de si algún campo tiene NULL.
+            Por eso <code>COUNT(*)</code> y <code>COUNT(1)</code> son la opción correcta.<br>
+            Si usásemos <code>COUNT(State)</code> obtendríamos el mismo resultado <em>aquí</em> porque <code>State</code> no tiene NULLs en los clientes de USA, pero si los tuviese el conteo sería incorrecto.
+            La convención más extendida hoy es usar <code>COUNT(*)</code>; <code>COUNT(1)</code> era una optimización en bases de datos antiguas que los motores modernos (incluido SQLite) ya no necesitan.
+          </p>
+        </div>
+
+        <div class="tabs">
+          <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab(this,'ej13-sql')">SQL</button>
+            <button class="tab-btn" onclick="switchTab(this,'ej13-pandas')">Pandas</button>
+          </div>
+          <div class="tab-content active" id="ej13-sql">
+<pre><code><span class="kw">SELECT</span> State, <span class="fn">COUNT</span>(<span class="num">1</span>) <span class="kw">AS</span> StateCount
+<span class="kw">FROM</span> customers
+<span class="kw">WHERE</span> Country = <span class="str">"USA"</span>
+<span class="kw">GROUP BY</span> State
+<span class="kw">ORDER BY</span> StateCount <span class="kw">DESC</span></code></pre>
+            <div class="output-wrap">
+              <div class="output-label">Resultado</div>
+              <table>
+                <tr><th>State</th><th>StateCount</th></tr>
+                <tr><td>CA</td><td>3</td></tr>
+                <tr><td>WI</td><td>1</td></tr>
+                <tr><td>WA</td><td>1</td></tr>
+                <tr><td colspan="2" style="color:var(--muted);text-align:center">… 8 estados más (todos con 1)</td></tr>
+              </table>
+            </div>
+          </div>
+          <div class="tab-content" id="ej13-pandas">
+<pre><code>df = sql_query(<span class="str">"SELECT * FROM customers"</span>)
+
+df[df.Country == <span class="str">"USA"</span>] \
+    .groupby(<span class="str">"State"</span>, as_index=<span class="kw">False</span>)[<span class="str">"CustomerId"</span>] \
+    .count() \
+    .sort_values(<span class="str">"CustomerId"</span>, ascending=<span class="kw">False</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <strong>Error frecuente:</strong> Usar <code>ORDER BY State</code> en lugar de <code>ORDER BY StateCount DESC</code>. Verificar que el resultado está ordenado por el conteo, no alfabéticamente.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════ SECCIÓN 2 ══════════════════════ -->
+    <div class="section-divider"><h2>#2 JOINs</h2><hr/></div>
+
+    <!-- 2.1 -->
+    <div class="exercise" id="ej21">
+      <div class="exercise-header">
+        <span class="exercise-num">2.1</span>
+        <span class="exercise-title">Nombre de canciones y su género (LEFT JOIN)</span>
+        <span class="time-badge">⏱ 5 min</span>
+      </div>
+      <div class="exercise-body">
+
+        <div class="enunciado">
+          Muestra el nombre de todas las canciones y el género al que pertenecen, incluso las que no tengan género asignado. Renombra las columnas como "Canción" y "Género".
+        </div>
+
+        <div class="explanation">
+          <strong>Conceptos clave:</strong>
+          <ul style="margin-top:0.5rem; padding-left:1.25rem;">
+            <li><strong>LEFT JOIN</strong>: devuelve todas las filas de la tabla izquierda (<code>tracks</code>) y las coincidencias de la tabla derecha (<code>genres</code>). Si una canción no tuviera género, aparecería con <code>NULL</code> en el campo del género.</li>
+            <li><strong>¿Por qué LEFT y no INNER?</strong> El enunciado dice "lo tengan o no", lo que implica que no debemos descartar canciones sin género.</li>
+            <li>Se accede a columnas con el mismo nombre cualificando con el nombre de tabla: <code>tracks.name</code> vs <code>genres.name</code>.</li>
+          </ul>
+        </div>
+
+        <div class="tabs">
+          <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab(this,'ej21-sql')">SQL</button>
+          </div>
+          <div class="tab-content active" id="ej21-sql">
+<pre><code><span class="kw">SELECT</span>
+    tracks.name  <span class="str">"Canción"</span>,
+    genres.name  <span class="str">"Género"</span>
+<span class="kw">FROM</span> tracks
+<span class="kw">LEFT JOIN</span> genres
+    <span class="kw">ON</span> tracks.GenreId = genres.GenreId</code></pre>
+            <div class="output-wrap">
+              <div class="output-label">Resultado (3503 filas)</div>
+              <table>
+                <tr><th>Canción</th><th>Género</th></tr>
+                <tr><td>For Those About To Rock (We Salute You)</td><td>Rock</td></tr>
+                <tr><td>Balls to the Wall</td><td>Rock</td></tr>
+                <tr><td>Fast As a Shark</td><td>Rock</td></tr>
+                <tr><td colspan="2" style="color:var(--muted);text-align:center">… 3500 filas más</td></tr>
+                <tr><td>Koyaanisqatsi</td><td>Soundtrack</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout info">
+          <strong>Nota:</strong> En SQLite se pueden usar comillas dobles tanto para strings literales como para aliases. En otros gestores (PostgreSQL, MySQL) lo correcto para aliases es no usar comillas o usar comillas dobles, reservando las simples para literales.
+        </div>
+      </div>
+    </div>
+
+    <!-- INCISO -->
+    <div class="exercise" id="inciso">
+      <div class="exercise-header">
+        <span class="exercise-num">Inciso</span>
+        <span class="exercise-title">Joins en Pandas — el método <code>merge()</code></span>
+        <span class="time-badge">⏱ 5 min</span>
+      </div>
+      <div class="exercise-body">
+        <div class="explanation">
+          <strong>Resumen del método <code>merge()</code>:</strong>
+          <ul style="margin-top:0.5rem; padding-left:1.25rem;">
+            <li><code>how="left"</code> → LEFT JOIN</li>
+            <li><code>how="right"</code> → RIGHT JOIN</li>
+            <li><code>how="inner"</code> → INNER JOIN (por defecto)</li>
+            <li><code>how="outer"</code> → FULL OUTER JOIN</li>
+            <li><code>on="columna"</code> cuando la columna de cruce se llama igual en ambos DataFrames</li>
+            <li><code>left_on / right_on</code> cuando los nombres son distintos</li>
+            <li><code>left_index / right_index = True</code> para cruzar por el índice</li>
+            <li><code>suffixes=("_x","_y")</code> controla los sufijos que se añaden a columnas con el mismo nombre</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2.2 -->
+    <div class="exercise" id="ej22">
+      <div class="exercise-header">
+        <span class="exercise-num">2.2</span>
+        <span class="exercise-title">Cargar <code>df_tracks</code> y <code>df_genres</code></span>
+        <span class="time-badge">⏱ 2 min</span>
+      </div>
+      <div class="exercise-body">
+        <div class="enunciado">
+          Carga las tablas <code>tracks</code> y <code>genres</code> en dos DataFrames.
+        </div>
+        <div class="tabs">
+          <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab(this,'ej22-py')">Python</button>
+          </div>
+          <div class="tab-content active" id="ej22-py">
+<pre><code>df_tracks = sql_query(<span class="str">"SELECT * FROM tracks"</span>)
+df_genres = sql_query(<span class="str">"SELECT * FROM genres"</span>)</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2.3 -->
+    <div class="exercise" id="ej23">
+      <div class="exercise-header">
+        <span class="exercise-num">2.3</span>
+        <span class="exercise-title">Preguntas sobre el merge</span>
+        <span class="time-badge">⏱ 3 min</span>
+      </div>
+      <div class="exercise-body">
+        <div class="enunciado">
+          a) Si ponemos <code>df_tracks</code> primero, ¿qué valor debe tener <code>how</code> para repetir el LEFT JOIN del 2.1?<br/>
+          b) ¿Cuál es la columna de cruce? ¿Usamos <code>on</code> o <code>left_on</code>/<code>right_on</code>?
+        </div>
+        <div class="answer">
+          <strong>a)</strong> <code>how="left"</code>, porque queremos todas las canciones (tabla izquierda = df_tracks) aunque no tengan género en df_genres.<br/><br/>
+          <strong>b)</strong> La columna de cruce es <code>GenreId</code> y se llama igual en ambos DataFrames, por lo que usamos <code>on="GenreId"</code>.
+        </div>
+      </div>
+    </div>
+
+    <!-- 2.4 -->
+    <div class="exercise" id="ej24">
+      <div class="exercise-header">
+        <span class="exercise-num">2.4</span>
+        <span class="exercise-title">Ejecutar el merge y observar sufijos</span>
+        <span class="time-badge">⏱ 3 min</span>
+      </div>
+      <div class="exercise-body">
+        <div class="enunciado">
+          Realiza el join y observa qué ocurre con las columnas que tienen el mismo nombre (<code>Name</code>) en ambos DataFrames.
+        </div>
+        <div class="explanation">
+          <strong>Comportamiento de <code>merge()</code> con columnas homónimas:</strong> Pandas añade automáticamente el sufijo <code>_x</code> a la columna del DataFrame izquierdo e <code>_y</code> al del derecho. La columna de cruce (<code>GenreId</code>) no se duplica. Se puede personalizar con <code>suffixes=("_tracks","_genres")</code>.
+        </div>
+        <div class="tabs">
+          <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab(this,'ej24-py')">Python</button>
+          </div>
+          <div class="tab-content active" id="ej24-py">
+<pre><code><span class="cm"># Merge básico — sufijos por defecto _x / _y</span>
+df_join = df_tracks.merge(df_genres, on=<span class="str">"GenreId"</span>, how=<span class="str">"left"</span>)
+
+<span class="cm"># Con sufijos personalizados</span>
+df_join = df_tracks.merge(
+    df_genres,
+    on=<span class="str">"GenreId"</span>,
+    how=<span class="str">"left"</span>,
+    suffixes=(<span class="str">"_tracks"</span>, <span class="str">"_genres"</span>)
+)
+df_join</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2.5 -->
+    <div class="exercise" id="ej25">
+      <div class="exercise-header">
+        <span class="exercise-num">2.5</span>
+        <span class="exercise-title">Renombrar columnas y seleccionar las necesarias</span>
+        <span class="time-badge">⏱ 2 min</span>
+      </div>
+      <div class="exercise-body">
+        <div class="enunciado">
+          Cambia los nombres de las columnas de <code>df_join</code> para reproducir el resultado del ejercicio 2.1 con columnas "Canción" y "Género".
+        </div>
+        <div class="tabs">
+          <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab(this,'ej25-py')">Python</button>
+          </div>
+          <div class="tab-content active" id="ej25-py">
+<pre><code>df_join = df_join.rename(
+    columns={<span class="str">"Name_tracks"</span>: <span class="str">"Canción"</span>, <span class="str">"Name_genres"</span>: <span class="str">"Género"</span>}
+)[[<span class="str">"Canción"</span>, <span class="str">"Género"</span>]]
+
+df_join</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2.6 -->
+    <div class="exercise" id="ej26">
+      <div class="exercise-header">
+        <span class="exercise-num">2.6</span>
+        <span class="exercise-title">Número de canciones por género (RIGHT JOIN + GROUP BY)</span>
+        <span class="time-badge">⏱ 5 min</span>
+      </div>
+      <div class="exercise-body">
+
+        <div class="enunciado">
+          Obtén el número de canciones por género ordenado de mayor a menor. Usa el JOIN que creas conveniente.
+        </div>
+
+        <div class="explanation">
+          <strong>Conceptos clave:</strong>
+          <ul style="margin-top:0.5rem; padding-left:1.25rem;">
+            <li><strong>¿Por qué RIGHT JOIN?</strong> Queremos que aparezcan todos los géneros, aunque no tengan canciones. Si la tabla base es <code>tracks</code>, necesitamos un RIGHT JOIN para que los géneros sin canciones aparezcan de todas formas.</li>
+            <li>Alternativamente, poniendo <code>genres</code> primero y haciendo LEFT JOIN se consigue exactamente lo mismo.</li>
+            <li>La diferencia respecto al LEFT JOIN de 2.1 es que aquí el resultado lo mandan los géneros, no las canciones.</li>
+          </ul>
+        </div>
+
+        <div class="tabs">
+          <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab(this,'ej26-sql')">SQL</button>
+            <button class="tab-btn" onclick="switchTab(this,'ej26-pandas')">Pandas</button>
+          </div>
+          <div class="tab-content active" id="ej26-sql">
+<pre><code><span class="kw">SELECT</span>
+    <span class="fn">COUNT</span>(<span class="num">1</span>) <span class="str">"NumCanciones"</span>,
+    genres.name <span class="str">"Género"</span>
+<span class="kw">FROM</span> tracks
+<span class="kw">RIGHT JOIN</span> genres
+    <span class="kw">ON</span> tracks.GenreId = genres.GenreId
+<span class="kw">GROUP BY</span> Género
+<span class="kw">ORDER BY</span> NumCanciones <span class="kw">DESC</span></code></pre>
+            <div class="output-wrap">
+              <div class="output-label">Resultado (top 5)</div>
+              <table>
+                <tr><th>NumCanciones</th><th>Género</th></tr>
+                <tr><td>1297</td><td>Rock</td></tr>
+                <tr><td>579</td><td>Latin</td></tr>
+                <tr><td>374</td><td>Metal</td></tr>
+                <tr><td>332</td><td>Alternative &amp; Punk</td></tr>
+                <tr><td>130</td><td>Jazz</td></tr>
+              </table>
+            </div>
+          </div>
+          <div class="tab-content" id="ej26-pandas">
+<pre><code><span class="cm"># Reutilizando df_join del ejercicio 2.5</span>
+df_resultado = (
+    df_join
+    .groupby(<span class="str">"Género"</span>, as_index=<span class="kw">False</span>)[<span class="str">"Canción"</span>]
+    .count()
+    .sort_values(<span class="str">"Canción"</span>, ascending=<span class="kw">False</span>)
+    .rename(columns={<span class="str">"Canción"</span>: <span class="str">"Num_Canciones"</span>})
+)
+
+<span class="cm"># One-liner desde cero</span>
+df_tracks[[<span class="str">"Name"</span>, <span class="str">"GenreId"</span>]] \
+    .merge(df_genres[[<span class="str">"Name"</span>, <span class="str">"GenreId"</span>]], on=<span class="str">"GenreId"</span>, how=<span class="str">"right"</span>) \
+    .rename(columns={<span class="str">"Name_x"</span>: <span class="str">"Canción"</span>, <span class="str">"Name_y"</span>: <span class="str">"Género"</span>}) \
+    .groupby(<span class="str">"Género"</span>, as_index=<span class="kw">False</span>)[<span class="str">"Canción"</span>].count() \
+    .sort_values(<span class="str">"Canción"</span>, ascending=<span class="kw">False</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <strong>Error frecuente:</strong> Usar INNER JOIN. Perdería los géneros sin canciones (en este dataset todos tienen al menos una, pero la elección del tipo de JOIN demuestra si el alumno comprende el concepto).
+        </div>
+      </div>
+    </div>
+
+    <!-- 2.7 -->
+    <div class="exercise" id="ej27">
+      <div class="exercise-header">
+        <span class="exercise-num">2.7</span>
+        <span class="exercise-title">Clientes alemanes con facturas (INNER JOIN)</span>
+        <span class="time-badge">⏱ 7 min</span>
+      </div>
+      <div class="exercise-body">
+
+        <div class="enunciado">
+          Obtén los clientes de Alemania (nombre completo, ciudad, país) que tengan facturas, junto con el id y fecha de las mismas. Antes de codificar: ¿qué tipo de JOIN y por qué?
+        </div>
+
+        <div class="answer">
+          <strong>Tipo de JOIN:</strong> INNER JOIN — solo queremos las coincidencias entre ambas tablas (clientes alemanes <em>que además tengan facturas</em>). Los clientes sin facturas deben quedar excluidos.
+        </div>
+
+        <div class="explanation" style="margin-top:1rem;">
+          <strong>Conceptos clave:</strong>
+          <ul style="margin-top:0.5rem; padding-left:1.25rem;">
+            <li>El <code>WHERE</code> de país se aplica después del JOIN, filtrando sobre el resultado combinado.</li>
+            <li>Para evitar ambigüedad entre campos del mismo nombre en distintas tablas, se cualifica con el nombre de la tabla: <code>customers.CustomerId</code> vs <code>invoices.CustomerId</code>.</li>
+            <li>En Pandas, el <code>how="inner"</code> es el valor por defecto, por lo que no hace falta especificarlo.</li>
+          </ul>
+        </div>
+
+        <div class="tabs">
+          <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab(this,'ej27-sql')">SQL</button>
+            <button class="tab-btn" onclick="switchTab(this,'ej27-pandas')">Pandas (extra)</button>
+          </div>
+          <div class="tab-content active" id="ej27-sql">
+<pre><code><span class="kw">SELECT</span>
+    customers.FirstName <span class="op">||</span> <span class="str">" "</span> <span class="op">||</span> customers.LastName <span class="kw">AS</span> <span class="str">"FullName"</span>,
+    customers.City,
+    customers.Country,
+    invoices.InvoiceId,
+    invoices.InvoiceDate
+<span class="kw">FROM</span> invoices
+<span class="kw">JOIN</span> customers
+    <span class="kw">ON</span> customers.CustomerId = invoices.CustomerId
+<span class="kw">WHERE</span> customers.Country = <span class="str">"Germany"</span></code></pre>
+            <div class="output-wrap">
+              <div class="output-label">Resultado (28 filas — 4 clientes con sus facturas)</div>
+              <table>
+                <tr><th>FullName</th><th>City</th><th>Country</th><th>InvoiceId</th><th>InvoiceDate</th></tr>
+                <tr><td>Leonie Köhler</td><td>Stuttgart</td><td>Germany</td><td>1</td><td>2009-01-01</td></tr>
+                <tr><td>Leonie Köhler</td><td>Stuttgart</td><td>Germany</td><td>12</td><td>2009-02-11</td></tr>
+                <tr><td>Hannah Schneider</td><td>Berlin</td><td>Germany</td><td>29</td><td>2009-05-05</td></tr>
+                <tr><td>Fynn Zimmermann</td><td>Frankfurt</td><td>Germany</td><td>6</td><td>2009-01-19</td></tr>
+                <tr><td colspan="5" style="color:var(--muted);text-align:center">… 24 filas más</td></tr>
+              </table>
+            </div>
+          </div>
+          <div class="tab-content" id="ej27-pandas">
+<pre><code>df_customers = sql_query(
+    <span class="str">"SELECT FirstName || ' ' || LastName AS 'Full_Name', CustomerId, City, Country FROM customers"</span>
+)
+df_invoices = sql_query(<span class="str">"SELECT InvoiceId, CustomerId, InvoiceDate FROM invoices"</span>)
+
+<span class="cm"># how="inner" es el valor por defecto</span>
+df_merge = df_customers.merge(df_invoices, on=<span class="str">"CustomerId"</span>)
+
+df_merge.loc[
+    df_merge.Country == <span class="str">"Germany"</span>,
+    [<span class="str">"Full_Name"</span>, <span class="str">"City"</span>, <span class="str">"Country"</span>, <span class="str">"InvoiceId"</span>, <span class="str">"InvoiceDate"</span>]
+]</code></pre>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <strong>Punto clave en corrección:</strong> Que el alumno justifique el INNER JOIN antes de codificar. La versión Pandas es voluntaria.
+        </div>
+      </div>
+    </div>
+
+    <!-- 2.8 -->
+    <div class="exercise" id="ej28">
+      <div class="exercise-header">
+        <span class="exercise-num">2.8</span>
+        <span class="exercise-title">Clientes brasileños con número de compras</span>
+        <span class="time-badge">⏱ 5 min</span>
+      </div>
+      <div class="exercise-body">
+
+        <div class="enunciado">
+          Obtén los clientes de Brasil que hicieron compras y cuántas compras hizo cada uno.
+        </div>
+
+        <div class="explanation">
+          <strong>Conceptos clave:</strong>
+          <ul style="margin-top:0.5rem; padding-left:1.25rem;">
+            <li>Combina INNER JOIN (solo los que tienen facturas) con GROUP BY para contar las facturas por cliente.</li>
+            <li><code>GROUP BY 1</code> agrupa por la primera columna del SELECT, útil cuando hay expresiones complejas como la concatenación del nombre.</li>
+            <li>Como todos los campos a extraer son de <code>customers</code>, no hace falta cualificar con el nombre de tabla en el SELECT (excepto en el ON del JOIN).</li>
+          </ul>
+        </div>
+
+        <div class="tabs">
+          <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab(this,'ej28-sql')">SQL</button>
+            <button class="tab-btn" onclick="switchTab(this,'ej28-pandas')">Pandas (extra)</button>
+          </div>
+          <div class="tab-content active" id="ej28-sql">
+<pre><code><span class="kw">SELECT</span>
+    FirstName <span class="op">||</span> <span class="str">" "</span> <span class="op">||</span> LastName <span class="kw">AS</span> <span class="str">"Full_Name"</span>,
+    <span class="fn">COUNT</span>(<span class="num">1</span>) <span class="kw">AS</span> <span class="str">"Compras"</span>
+<span class="kw">FROM</span> customers
+<span class="kw">INNER JOIN</span> invoices
+    <span class="kw">ON</span> customers.CustomerId = invoices.CustomerId
+<span class="kw">WHERE</span> customers.Country = <span class="str">"Brazil"</span>
+<span class="kw">GROUP BY</span> <span class="num">1</span></code></pre>
+            <div class="output-wrap">
+              <div class="output-label">Resultado</div>
+              <table>
+                <tr><th>Full_Name</th><th>Compras</th></tr>
+                <tr><td>Alexandre Rocha</td><td>7</td></tr>
+                <tr><td>Eduardo Martins</td><td>7</td></tr>
+                <tr><td>Fernanda Ramos</td><td>7</td></tr>
+                <tr><td>Luís Gonçalves</td><td>7</td></tr>
+                <tr><td>Roberto Almeida</td><td>7</td></tr>
+              </table>
+            </div>
+          </div>
+          <div class="tab-content" id="ej28-pandas">
+<pre><code><span class="cm"># Reutilizando df_merge del ejercicio anterior</span>
+df_merge[df_merge.Country == <span class="str">"Brazil"</span>] \
+    .groupby(<span class="str">"Full_Name"</span>, as_index=<span class="kw">False</span>)[<span class="str">"CustomerId"</span>] \
+    .count() \
+    .sort_values(<span class="str">"Full_Name"</span>)</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2.9 -->
+    <div class="exercise" id="ej29">
+      <div class="exercise-header">
+        <span class="exercise-num">2.9</span>
+        <span class="exercise-title">Reflexión: SQL vs Pandas</span>
+        <span class="time-badge">⏱ 2 min</span>
+      </div>
+      <div class="exercise-body">
+
+        <div class="enunciado">
+          Expón las ventajas e inconvenientes de SQL frente a Pandas y cuándo usar cada uno.
+        </div>
+
+        <div class="answer">
+          <strong>SQL:</strong>
+          <ul style="margin-top:0.5rem; padding-left:1.25rem;">
+            <li>Más natural para consultas de cruce, agrupación y filtrado sobre datos relacionales.</li>
+            <li>Se ejecuta en el motor de la base de datos (eficiente para grandes volúmenes).</li>
+            <li>Limitado a operaciones declarativas; no puedes usar lógica arbitraria de programación.</li>
+          </ul>
+          <strong>Pandas:</strong>
+          <ul style="margin-top:0.5rem; padding-left:1.25rem;">
+            <li>Una vez los datos están en memoria, las transformaciones encadenadas son muy potentes.</li>
+            <li>Acceso a todo el ecosistema Python (visualización, ML, etc.).</li>
+            <li>Más verboso con los nombres de columnas y las convenciones del merge.</li>
+          </ul>
+          <strong>Conclusión:</strong> No es una elección excluyente. SQL para extraer y filtrar en la fuente; Pandas para transformar y analizar en memoria.
+        </div>
+
+        <div class="callout tip">
+          <strong>Criterio de corrección:</strong> Ejercicio de reflexión abierta. Puntúa con cualquier respuesta razonada. No es necesario que coincida con la respuesta modelo.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════ EXTRA ══════════════════════ -->
+    <div class="section-divider"><h2>Ejercicios Extra</h2><hr/></div>
+
+    <!-- E1 -->
+    <div class="exercise" id="eje1">
+      <div class="exercise-header">
+        <span class="exercise-num">Extra E1</span>
+        <span class="exercise-title">Canciones, álbum y género (doble JOIN encadenado)</span>
+        <span class="time-badge">⏱ 8 min</span>
+      </div>
+      <div class="exercise-body">
+
+        <div class="enunciado">
+          Muestra el nombre de todas las canciones, el álbum al que pertenecen y su género. Requiere encadenar dos JOINs.
+        </div>
+
+        <div class="explanation">
+          <strong>Conceptos clave:</strong>
+          <ul style="margin-top:0.5rem; padding-left:1.25rem;">
+            <li><strong>JOINs encadenados:</strong> cada JOIN añade una tabla al resultado. Se pueden encadenar tantos como sean necesarios.</li>
+            <li><strong>Aliases de tabla</strong> (<code>AS A</code>, <code>AS B</code>, …): cuando hay muchas tablas, los alias hacen el SQL más legible y evitan escribir el nombre completo en cada referencia.</li>
+            <li><code>tracks</code> es la tabla central que tiene tanto <code>AlbumId</code> como <code>GenreId</code>, por eso parte de ella y se une hacia <code>albums</code> y <code>genres</code>.</li>
+          </ul>
+        </div>
+
+        <div class="tabs">
+          <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab(this,'eje1-sql')">SQL</button>
+          </div>
+          <div class="tab-content active" id="eje1-sql">
+<pre><code><span class="kw">SELECT</span>
+    A.Name  <span class="str">"Canción"</span>,
+    B.Title <span class="str">"Álbum"</span>,
+    C.Name  <span class="str">"Género"</span>
+<span class="kw">FROM</span> tracks <span class="kw">AS</span> A
+<span class="kw">INNER JOIN</span> albums <span class="kw">AS</span> B
+    <span class="kw">ON</span> A.AlbumId = B.AlbumId
+<span class="kw">INNER JOIN</span> genres <span class="kw">AS</span> C
+    <span class="kw">ON</span> A.GenreId = C.GenreId</code></pre>
+            <div class="output-wrap">
+              <div class="output-label">Resultado (3503 filas)</div>
+              <table>
+                <tr><th>Canción</th><th>Álbum</th><th>Género</th></tr>
+                <tr><td>For Those About To Rock…</td><td>For Those About To Rock We Salute You</td><td>Rock</td></tr>
+                <tr><td>Balls to the Wall</td><td>Balls to the Wall</td><td>Rock</td></tr>
+                <tr><td>Fast As a Shark</td><td>Restless and Wild</td><td>Rock</td></tr>
+                <tr><td colspan="3" style="color:var(--muted);text-align:center">… 3500 filas más</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout info">
+          <strong>Nota sobre INNER vs LEFT:</strong> Se usa INNER porque todas las canciones tienen álbum y género en este dataset. Si existieran canciones huérfanas habría que cambiar a LEFT JOIN para no perderlas.
+        </div>
+      </div>
+    </div>
+
+    <!-- E2 -->
+    <div class="exercise" id="eje2">
+      <div class="exercise-header">
+        <span class="exercise-num">Extra E2</span>
+        <span class="exercise-title">Clientes norteamericanos y canciones que compraron (4 JOINs)</span>
+        <span class="time-badge">⏱ 12 min</span>
+      </div>
+      <div class="exercise-body">
+
+        <div class="enunciado">
+          Muestra la lista de clientes norteamericanos (USA y Canadá) que compraron canciones y cuáles son esas canciones.
+        </div>
+
+        <div class="explanation">
+          <strong>Conceptos clave — cadena de tablas necesaria:</strong>
+          <div style="margin-top:0.75rem; padding:0.75rem 1rem; background:var(--surface2); border-radius:8px; font-family:monospace; font-size:0.85rem;">
+            customers → invoices → invoice_items → tracks
+          </div>
+          <ul style="margin-top:0.75rem; padding-left:1.25rem;">
+            <li><code>customers</code> ↔ <code>invoices</code> por <code>CustomerId</code></li>
+            <li><code>invoices</code> ↔ <code>invoice_items</code> por <code>InvoiceId</code></li>
+            <li><code>invoice_items</code> ↔ <code>tracks</code> por <code>TrackId</code></li>
+            <li>La tabla <code>invoice_items</code> es la tabla de detalle de factura (cada línea = una canción comprada).</li>
+            <li>Norteamérica incluye USA, Canadá y México, pero en el dataset no hay clientes mexicanos.</li>
+          </ul>
+        </div>
+
+        <div class="tabs">
+          <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab(this,'eje2-sql')">SQL</button>
+          </div>
+          <div class="tab-content active" id="eje2-sql">
+<pre><code><span class="kw">SELECT</span>
+    A.FirstName <span class="op">||</span> <span class="str">" "</span> <span class="op">||</span> A.LastName  <span class="str">"Full Name"</span>,
+    D.Name                              <span class="str">"Canción"</span>,
+    A.Country
+<span class="kw">FROM</span> customers <span class="kw">AS</span> A
+<span class="kw">INNER JOIN</span> invoices <span class="kw">AS</span> B
+    <span class="kw">ON</span> A.CustomerId = B.CustomerId
+<span class="kw">INNER JOIN</span> invoice_items <span class="kw">AS</span> C
+    <span class="kw">ON</span> B.InvoiceId = C.InvoiceId
+<span class="kw">INNER JOIN</span> tracks <span class="kw">AS</span> D
+    <span class="kw">ON</span> C.TrackId = D.TrackId
+<span class="kw">WHERE</span> A.Country <span class="kw">IN</span> (<span class="str">"USA"</span>, <span class="str">"Canada"</span>)</code></pre>
+            <div class="output-wrap">
+              <div class="output-label">Resultado (798 filas)</div>
+              <table>
+                <tr><th>Full Name</th><th>Canción</th><th>Country</th></tr>
+                <tr><td>François Tremblay</td><td>Pilot</td><td>Canada</td></tr>
+                <tr><td>François Tremblay</td><td>Through the Looking Glass, Pt. 1</td><td>Canada</td></tr>
+                <tr><td>François Tremblay</td><td>Cochise</td><td>Canada</td></tr>
+                <tr><td colspan="3" style="color:var(--muted);text-align:center">… 795 filas más</td></tr>
+                <tr><td>Ellie Sullivan</td><td>You Are The Everything</td><td>Canada</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <strong>Error frecuente:</strong> No conocer la tabla intermedia <code>invoice_items</code> e intentar unir <code>invoices</code> directamente con <code>tracks</code>. La clave está en el modelo de datos: las facturas tienen líneas de detalle (<code>invoice_items</code>) que referencian las pistas.
+        </div>
+
+        <div class="callout tip">
+          <strong>Punto clave en corrección:</strong> Que el alumno identifique correctamente la cadena de 4 tablas. El resultado exacto (798 filas) sirve de comprobación numérica.
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  function switchTab(btn, targetId) {
+    const tabGroup = btn.closest('.tabs');
+    tabGroup.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    tabGroup.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(targetId).classList.add('active');
+  }
+</script>
+</body>
+</html>
