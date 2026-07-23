@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ejercicio BI — Plantilla de equipo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F4F6F5; --bg-card: #FFFFFF; --bg-sunken: #ECF0EE;
+    --border: #DCE3E0; --border-soft: #E7ECEA;
+    --text-primary: #16211D; --text-secondary: #4E5F59; --text-tertiary: #8B9C96;
+    --accent: #0E7C66; --accent-dim: #E4F1EC; --accent-ink: #08493D;
+    --amber: #C97D1F; --amber-dim: #FBEEDD;
+    --red: #C0432E; --red-dim: #FBEAE6;
+    --font-display: 'Manrope', sans-serif; --font-body: 'Inter', sans-serif; --font-mono: 'JetBrains Mono', monospace;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background: var(--bg); color: var(--text-primary); font-family: var(--font-body); font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3{ font-family: var(--font-display); font-weight:700; letter-spacing:-0.01em; }
+  code,.mono{ font-family: var(--font-mono); }
+  strong{ color: var(--accent-ink); }
+
+  .wrap{ max-width: 920px; margin:0 auto; padding: 40px 24px 100px; }
+  @media (max-width:640px){ .wrap{ padding:24px 16px 80px; } }
+
+  /* HEADER */
+  .top{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:8px; flex-wrap:wrap; }
+  .kicker{ font-family: var(--font-mono); font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color: var(--accent); margin-bottom:10px; }
+  h1{ font-size: clamp(26px,4vw,36px); margin-bottom:10px; }
+  .lead{ font-size:16.5px; color: var(--text-secondary); max-width:640px; margin-bottom: 20px; }
+
+  /* TIMER */
+  .timer-box{
+    background: var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:16px 20px;
+    display:flex; align-items:center; gap:16px; min-width: 230px;
+  }
+  .timer-display{ font-family: var(--font-mono); font-size:30px; font-weight:600; color: var(--accent-ink); font-variant-numeric: tabular-nums; }
+  .timer-label{ font-family: var(--font-mono); font-size:10px; color: var(--text-tertiary); text-transform:uppercase; letter-spacing:.08em; }
+  .timer-btns{ display:flex; gap:6px; }
+  .timer-btn{ font-family: var(--font-mono); font-size:11px; padding:7px 10px; border-radius:7px; border:1px solid var(--border); background: var(--bg-sunken); color: var(--text-secondary); cursor:pointer; }
+  .timer-btn:hover{ border-color: var(--accent); }
+
+  /* SECTION CARD */
+  .card{ background: var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:26px 28px; margin-bottom:22px; }
+  .card h2{ font-size:19px; margin-bottom:6px; display:flex; align-items:center; gap:10px; }
+  .step-n{ font-family: var(--font-mono); font-size:12px; color:#fff; background: var(--accent); width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .card .hint{ font-size:13.8px; color: var(--text-secondary); margin-bottom:16px; }
+
+  textarea, input[type=text]{
+    width:100%; font-family: var(--font-body); font-size:14.5px; color: var(--text-primary);
+    background: var(--bg-sunken); border:1px solid var(--border); border-radius:10px; padding:12px 14px;
+    resize: vertical; line-height:1.5;
+  }
+  textarea:focus, input[type=text]:focus{ outline:none; border-color: var(--accent); background:#fff; }
+  label.field-label{ display:block; font-family: var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--text-tertiary); margin-bottom:6px; margin-top:14px; }
+  label.field-label:first-child{ margin-top:0; }
+
+  /* KPI CANVAS */
+  .kpi-card{ border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; background: var(--bg-sunken); position:relative; }
+  .kpi-card .kpi-remove{ position:absolute; top:12px; right:12px; background:none; border:none; color: var(--text-tertiary); cursor:pointer; font-size:16px; line-height:1; }
+  .kpi-card .kpi-remove:hover{ color: var(--red); }
+  .kpi-num{ font-family: var(--font-mono); font-size:11px; color: var(--accent); margin-bottom:8px; }
+  .add-kpi-btn{
+    font-family: var(--font-mono); font-size:13px; padding:11px 18px; border-radius:9px; cursor:pointer;
+    border:1.5px dashed var(--border); background:transparent; color: var(--text-secondary); width:100%; text-align:center;
+  }
+  .add-kpi-btn:hover{ border-color: var(--accent); color: var(--accent-ink); }
+
+  /* STAKEHOLDER PREP */
+  .sh-generator{ display:flex; gap:10px; align-items:center; margin-bottom:14px; flex-wrap:wrap; }
+  .sh-btn{
+    font-family: var(--font-mono); font-size:13px; padding:11px 18px; border-radius:9px; cursor:pointer;
+    border:none; background: var(--accent); color:#fff;
+  }
+  .sh-btn:hover{ background: var(--accent-ink); }
+  .sh-question{ background: var(--amber-dim); border-left:3px solid var(--amber); border-radius:8px; padding:14px 16px; font-size:14.5px; color:#5c3d10; margin-bottom:12px; min-height:20px; }
+
+  /* RUBRIC */
+  table.rubric{ width:100%; border-collapse:collapse; font-size:13.8px; }
+  table.rubric th{ text-align:left; font-family: var(--font-mono); font-size:10.5px; text-transform:uppercase; color: var(--text-tertiary); padding:8px 10px; border-bottom:1px solid var(--border); }
+  table.rubric td{ padding:10px; border-bottom:1px solid var(--border-soft); color: var(--text-secondary); }
+  table.rubric td:first-child{ color: var(--text-primary); font-weight:600; width:38%; }
+  table.rubric input[type=checkbox]{ width:16px; height:16px; accent-color: var(--accent); }
+
+  /* EXPORT */
+  .export-bar{
+    position: sticky; bottom:0; margin-top: 10px;
+    background: var(--bg-card); border:1px solid var(--border); border-radius:14px;
+    padding:16px 20px; display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap;
+    box-shadow: 0 -6px 20px rgba(0,0,0,0.05);
+  }
+  .export-btn{
+    font-family: var(--font-mono); font-size:13.5px; padding:12px 20px; border-radius:10px; cursor:pointer;
+    border:none; background: var(--accent-ink); color:#fff;
+  }
+  .export-btn:hover{ opacity:.9; }
+  .export-note{ font-size:12.5px; color: var(--text-tertiary); }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <div class="kicker">Ejercicio por equipos</div>
+      <h1>Vuestro dashboard, defendido como en una reunión real.</h1>
+      <p class="lead">Rellenad esto según trabajáis. Al final podéis exportarlo como vuestras notas de presentación.</p>
+    </div>
+    <div class="timer-box">
+      <div>
+        <div class="timer-label">Tiempo de equipo</div>
+        <div class="timer-display" id="timerDisplay">30:00</div>
+      </div>
+      <div class="timer-btns">
+        <button class="timer-btn" id="timerStart">▶</button>
+        <button class="timer-btn" id="timerReset">↺</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 1 -->
+  <div class="card">
+    <h2><span class="step-n">1</span>Vuestra pregunta de negocio</h2>
+    <p class="hint">Antes de abrir Looker Studio: si tuvierais 15 minutos con la Directora Comercial, ¿qué querría saber ella de vuestros datos?</p>
+    <textarea id="businessQuestion" rows="2" placeholder="Ej: ¿Está creciendo el negocio, y qué lo está impulsando?"></textarea>
+  </div>
+
+  <!-- PASO 2: KPI CANVAS -->
+  <div class="card">
+    <h2><span class="step-n">2</span>Canvas de KPIs</h2>
+    <p class="hint">Entre 3 y 5 KPIs. Por cada uno, justificad la elección — es lo que os van a preguntar.</p>
+    <div id="kpiList"></div>
+    <button class="add-kpi-btn" id="addKpiBtn">+ Añadir KPI</button>
+  </div>
+
+  <!-- PASO 3: HISTORIA -->
+  <div class="card">
+    <h2><span class="step-n">3</span>La historia (no solo los números)</h2>
+    <p class="hint">Dato → interpretación → recomendación. Esto es lo que diréis en voz alta en la presentación.</p>
+    <label class="field-label">Insight — ¿qué habéis descubierto?</label>
+    <textarea id="insight" rows="2" placeholder="Ej: Los ingresos han crecido un 12%, impulsados sobre todo por..."></textarea>
+    <label class="field-label">Recomendación — ¿qué haríais con esto?</label>
+    <textarea id="recommendation" rows="2" placeholder="Ej: Recomendaríamos reforzar el stock de..."></textarea>
+  </div>
+
+  <!-- PASO 4: STAKEHOLDER PREP -->
+  <div class="card">
+    <h2><span class="step-n">4</span>Preparación: preguntas de stakeholder</h2>
+    <p class="hint">Generad una pregunta al azar y practicad la respuesta antes de que os la haga de verdad.</p>
+    <div class="sh-generator">
+      <button class="sh-btn" id="shGenerate">🎲 Generar pregunta</button>
+    </div>
+    <div class="sh-question" id="shQuestion">Pulsa el botón para ver una pregunta.</div>
+    <label class="field-label">Vuestra respuesta</label>
+    <textarea id="shAnswer" rows="2" placeholder="Practicad la respuesta aquí..."></textarea>
+  </div>
+
+  <!-- RÚBRICA -->
+  <div class="card">
+    <h2><span class="step-n">✓</span>Autoevaluación antes de presentar</h2>
+    <p class="hint">Marcad lo que ya tenéis resuelto. Esto es lo que se va a evaluar.</p>
+    <table class="rubric">
+      <tr><th></th><th>Criterio</th></tr>
+      <tr><td><input type="checkbox"></td><td><strong>KPIs relevantes</strong> — responden a una pregunta de negocio real, no vanity metrics</td></tr>
+      <tr><td><input type="checkbox"></td><td><strong>Claridad visual</strong> — jerarquía, paleta consistente, sin sobrecarga</td></tr>
+      <tr><td><input type="checkbox"></td><td><strong>Gráfico correcto</strong> — el tipo de gráfico encaja con la pregunta que responde</td></tr>
+      <tr><td><input type="checkbox"></td><td><strong>Storytelling</strong> — vais más allá de leer números: interpretación + recomendación</td></tr>
+      <tr><td><input type="checkbox"></td><td><strong>Justificación</strong> — podéis defender cada decisión ante una pregunta incómoda</td></tr>
+      <tr><td><input type="checkbox"></td><td><strong>Corrección técnica</strong> — la conexión a BigQuery y los filtros funcionan bien</td></tr>
+    </table>
+  </div>
+
+  <div class="export-bar">
+    <div>
+      <div style="font-family:var(--font-mono); font-size:13px; font-weight:600;">Exportar como notas de presentación</div>
+      <div class="export-note">Descarga todo lo rellenado en un archivo de texto</div>
+    </div>
+    <button class="export-btn" id="exportBtn">⬇ Descargar</button>
+  </div>
+
+  <!-- CARDS GO HERE -->
+
+</div>
+
+<script>
+// ===== TIMER =====
+(function(){
+  let totalSeconds = 30*60;
+  let remaining = totalSeconds;
+  let running = false;
+  let intervalId = null;
+  const display = document.getElementById("timerDisplay");
+  const startBtn = document.getElementById("timerStart");
+  const resetBtn = document.getElementById("timerReset");
+
+  function render(){
+    const m = Math.floor(remaining/60).toString().padStart(2,"0");
+    const s = (remaining%60).toString().padStart(2,"0");
+    display.textContent = `${m}:${s}`;
+    display.style.color = remaining <= 300 ? "#C0432E" : "";
+  }
+  function tick(){
+    if(remaining > 0){ remaining--; render(); }
+    else{ clearInterval(intervalId); running=false; startBtn.textContent="▶"; }
+  }
+  startBtn.addEventListener("click", () => {
+    running = !running;
+    startBtn.textContent = running ? "⏸" : "▶";
+    if(running){ intervalId = setInterval(tick, 1000); }
+    else{ clearInterval(intervalId); }
+  });
+  resetBtn.addEventListener("click", () => {
+    clearInterval(intervalId); running=false; startBtn.textContent="▶";
+    remaining = totalSeconds; render();
+  });
+  render();
+})();
+
+// ===== KPI CANVAS =====
+(function(){
+  const list = document.getElementById("kpiList");
+  const addBtn = document.getElementById("addKpiBtn");
+  let count = 0;
+  const MAX = 5;
+
+  function addKpi(){
+    if(count >= MAX){ addBtn.textContent = "Máximo 5 KPIs"; return; }
+    count++;
+    const div = document.createElement("div");
+    div.className = "kpi-card";
+    div.innerHTML = `
+      <button class="kpi-remove" title="Eliminar">✕</button>
+      <div class="kpi-num">KPI ${count}</div>
+      <label class="field-label">Nombre del KPI</label>
+      <input type="text" class="kpi-nombre" placeholder="Ej: Ticket medio (AOV)">
+      <label class="field-label">¿Qué pregunta de negocio responde?</label>
+      <textarea class="kpi-pregunta" rows="2" placeholder="Ej: ¿Vendemos más caro o más volumen?"></textarea>
+      <label class="field-label">Tipo de gráfico elegido</label>
+      <input type="text" class="kpi-grafico" placeholder="Ej: Scorecard con comparación al periodo anterior">
+      <label class="field-label">Justificación (por qué este KPI y este gráfico)</label>
+      <textarea class="kpi-justificacion" rows="2" placeholder="Ej: Porque distingue si el crecimiento viene de..."></textarea>
+    `;
+    list.appendChild(div);
+    div.querySelector(".kpi-remove").addEventListener("click", () => {
+      div.remove();
+      renumber();
+    });
+  }
+  function renumber(){
+    count = 0;
+    list.querySelectorAll(".kpi-card").forEach(card => {
+      count++;
+      card.querySelector(".kpi-num").textContent = "KPI " + count;
+    });
+    addBtn.textContent = "+ Añadir KPI";
+  }
+  addBtn.addEventListener("click", addKpi);
+  // arrancar con 3 KPIs vacíos por defecto
+  addKpi(); addKpi(); addKpi();
+})();
+
+// ===== STAKEHOLDER QUESTION GENERATOR =====
+(function(){
+  const questions = [
+    "¿Por qué habéis elegido este KPI y no otro?",
+    "Si solo pudiera mirar un número de este dashboard antes de una reunión de 5 minutos, ¿cuál sería y por qué?",
+    "¿Qué decisión de negocio cambiaría si este número bajase un 20% el mes que viene?",
+    "¿Cómo sé que esta tendencia no es simplemente estacionalidad?",
+    "¿Qué falta en este dashboard que yo, como directora comercial, preguntaría en la reunión?",
+    "Me habéis enseñado el qué. ¿Cuál es el porqué?",
+    "Si tuviera que actuar sobre esto mañana mismo, ¿qué haríais vosotros en mi lugar?",
+    "¿Por qué este tipo de gráfico y no una tabla, o una línea temporal?",
+    "¿Este dato es fiable? ¿Cómo sé que no hay un error de agregación detrás?",
+    "¿Qué le diríais a alguien que os pregunta 'y esto para qué me sirve'?",
+  ];
+  const btn = document.getElementById("shGenerate");
+  const box = document.getElementById("shQuestion");
+  let lastIndex = -1;
+  btn.addEventListener("click", () => {
+    let idx;
+    do{ idx = Math.floor(Math.random()*questions.length); } while(idx === lastIndex && questions.length>1);
+    lastIndex = idx;
+    box.textContent = questions[idx];
+  });
+})();
+
+// ===== EXPORT =====
+(function(){
+  document.getElementById("exportBtn").addEventListener("click", () => {
+    const bq = document.getElementById("businessQuestion").value || "(sin rellenar)";
+    const insight = document.getElementById("insight").value || "(sin rellenar)";
+    const rec = document.getElementById("recommendation").value || "(sin rellenar)";
+    const shQ = document.getElementById("shQuestion").textContent;
+    const shA = document.getElementById("shAnswer").value || "(sin rellenar)";
+
+    let kpiText = "";
+    document.querySelectorAll(".kpi-card").forEach((card, i) => {
+      const nombre = card.querySelector(".kpi-nombre").value || "(sin nombre)";
+      const pregunta = card.querySelector(".kpi-pregunta").value || "(sin rellenar)";
+      const grafico = card.querySelector(".kpi-grafico").value || "(sin rellenar)";
+      const justif = card.querySelector(".kpi-justificacion").value || "(sin rellenar)";
+      kpiText += `\n  KPI ${i+1}: ${nombre}\n    Pregunta que responde: ${pregunta}\n    Gráfico: ${grafico}\n    Justificación: ${justif}\n`;
+    });
+
+    const content =
+`NOTAS DE PRESENTACIÓN — EJERCICIO BI LOOKER STUDIO
+================================================
+
+PREGUNTA DE NEGOCIO
+${bq}
+
+CANVAS DE KPIs
+${kpiText}
+
+LA HISTORIA
+  Insight: ${insight}
+  Recomendación: ${rec}
+
+PREPARACIÓN STAKEHOLDER
+  Pregunta practicada: ${shQ}
+  Respuesta: ${shA}
+`;
+
+    const blob = new Blob([content], {type: "text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "notas_presentacion_equipo.txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+})();
+</script>
+</body>
+</html>

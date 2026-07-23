@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BI con Looker Studio — Guía de referencia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F4F6F5;
+    --bg-card: #FFFFFF;
+    --bg-sunken: #ECF0EE;
+    --border: #DCE3E0;
+    --border-soft: #E7ECEA;
+    --text-primary: #16211D;
+    --text-secondary: #4E5F59;
+    --text-tertiary: #8B9C96;
+    --accent: #0E7C66;
+    --accent-dim: #E4F1EC;
+    --accent-ink: #08493D;
+    --amber: #C97D1F;
+    --amber-dim: #FBEEDD;
+    --red: #C0432E;
+    --red-dim: #FBEAE6;
+    --font-display: 'Manrope', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  html{ scroll-behavior: smooth; }
+  body{
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection{ background: var(--accent); color: #fff; }
+  a{ color: var(--accent-ink); }
+  h1,h2,h3,h4{ font-family: var(--font-display); font-weight: 700; letter-spacing: -0.01em; color: var(--text-primary); }
+  code, .mono{ font-family: var(--font-mono); }
+  p code.mono, li code.mono{ overflow-wrap: anywhere; word-break: break-word; }
+  strong{ color: var(--accent-ink); font-weight: 700; }
+
+  /* ===== SHELL ===== */
+  .shell{ display:grid; grid-template-columns: 250px minmax(0,1fr); max-width: 1280px; margin:0 auto; }
+  @media (max-width: 900px){ .shell{ grid-template-columns: 1fr; } }
+
+  .sidenav{
+    position: sticky; top:0; align-self:start; height:100vh; overflow-y:auto;
+    padding: 30px 18px 40px 28px; border-right: 1px solid var(--border-soft);
+  }
+  @media (max-width:900px){ .sidenav{ display:none; } }
+  .sidenav-brand{
+    font-family: var(--font-mono); font-size: 11.5px; letter-spacing:.12em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 24px; display:flex; align-items:center; gap:8px;
+  }
+  .sidenav-brand .sw{ width:9px; height:9px; border-radius:2px; background: var(--accent); }
+  .sidenav ol{ list-style:none; counter-reset: nav; }
+  .sidenav li{ counter-increment: nav; margin-bottom: 1px; }
+  .sidenav a{
+    display:flex; gap:9px; align-items:baseline; color: var(--text-secondary); font-size:13.3px;
+    padding:7px 9px; border-radius:7px; text-decoration:none; transition: background .15s, color .15s;
+  }
+  .sidenav a::before{ content: counter(nav, decimal-leading-zero); font-family: var(--font-mono); font-size:10.5px; color: var(--text-tertiary); }
+  .sidenav a:hover{ background: var(--bg-sunken); color: var(--text-primary); }
+  .sidenav a.active{ background: var(--accent-dim); color: var(--accent-ink); font-weight:600; }
+  .sidenav a.active::before{ color: var(--accent); }
+
+  main{ min-width:0; }
+  .section{ padding: 74px 44px; border-bottom: 1px solid var(--border-soft); max-width: 860px; }
+  @media (max-width:640px){ .section{ padding: 48px 20px; } }
+
+  .eyebrow{
+    font-family: var(--font-mono); font-size:11.5px; letter-spacing:.13em; text-transform:uppercase;
+    color: var(--accent); margin-bottom:12px; display:flex; align-items:center; gap:9px;
+  }
+  .eyebrow::before{ content:""; width:16px; height:1px; background: var(--accent); }
+  h2.section-title{ font-size: clamp(24px,3vw,31px); margin-bottom:16px; }
+  .section p.lead{ font-size:17.5px; color: var(--text-secondary); margin-bottom:26px; max-width:620px; }
+  .section p{ margin-bottom:15px; }
+  .section p.muted{ color: var(--text-secondary); }
+
+  /* ===== HERO ===== */
+  .hero{ padding: 64px 44px 36px; max-width:none; border-bottom:1px solid var(--border-soft); }
+  @media (max-width:640px){ .hero{ padding:42px 20px 20px; } }
+  .hero-kicker{ font-family: var(--font-mono); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color: var(--accent); margin-bottom:18px; }
+  .hero h1{ font-size: clamp(32px,4.8vw,50px); line-height:1.08; max-width:16ch; margin-bottom:20px; }
+  .hero h1 em{ font-style:normal; color: var(--accent); }
+  .hero .hero-lead{ font-size:17.5px; color: var(--text-secondary); max-width:58ch; margin-bottom: 28px; }
+
+  .badge-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 8px; }
+  .badge{
+    font-family: var(--font-mono); font-size:11.5px; padding:6px 12px; border-radius:20px;
+    background: var(--bg-card); border:1px solid var(--border); color: var(--text-secondary);
+  }
+
+  /* ===== CALLOUTS ===== */
+  .callout{ border-radius:12px; padding:18px 20px; margin:24px 0; border:1px solid var(--border); background: var(--bg-card); font-size:15px; }
+  .callout-title{ font-family: var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+  .callout.info{ border-left:3px solid var(--accent); } .callout.info .callout-title{ color: var(--accent-ink); }
+  .callout.warn{ border-left:3px solid var(--amber); background: var(--amber-dim); } .callout.warn .callout-title{ color:#8A5A16; }
+  .callout.danger{ border-left:3px solid var(--red); background: var(--red-dim);} .callout.danger .callout-title{ color:#8C3021; }
+  .callout p{ color: var(--text-secondary); margin-bottom:0; }
+  .callout.warn p, .callout.danger p{ color: var(--text-primary); }
+
+  /* ===== CARD GRID ===== */
+  .card-grid{ display:grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr)); gap:14px; margin:26px 0; }
+  .concept-card{ background: var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px; }
+  .concept-card .k{ font-family: var(--font-mono); font-size:10.5px; letter-spacing:.08em; color: var(--accent); text-transform:uppercase; margin-bottom:9px; }
+  .concept-card h4{ font-size:16px; margin-bottom:8px; }
+  .concept-card p{ font-size:13.6px; color: var(--text-secondary); margin-bottom:0; }
+  .concept-card.good{ border-color: var(--accent); }
+  .concept-card.bad{ border-color: var(--red); }
+
+  /* ===== TABLE ===== */
+  table.dtable{ width:100%; border-collapse:collapse; margin:22px 0; font-size:14px; display:block; overflow-x:auto; }
+  table.dtable > tbody{ display:table; width:100%; }
+  table.dtable th{ text-align:left; font-family: var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.06em; color: var(--text-tertiary); padding:10px 14px; border-bottom:1px solid var(--border); }
+  table.dtable td{ padding:12px 14px; border-bottom:1px solid var(--border-soft); color: var(--text-secondary); vertical-align:top; }
+  table.dtable td:first-child{ color: var(--text-primary); font-weight:600; }
+  table.dtable tr:last-child td{ border-bottom:none; }
+
+  /* ===== ACCORDION ===== */
+  .accordion-item{ border:1px solid var(--border); border-radius:12px; margin-bottom:9px; background: var(--bg-card); overflow:hidden; }
+  .accordion-head{ display:flex; justify-content:space-between; align-items:center; padding:15px 20px; cursor:pointer; user-select:none; }
+  .accordion-head h4{ font-size:15px; font-family: var(--font-body); font-weight:600; }
+  .accordion-head .tag{ font-family: var(--font-mono); font-size:10px; color: var(--text-tertiary); border:1px solid var(--border); padding:2px 7px; border-radius:4px; margin-right:10px; }
+  .accordion-icon{ width:18px; text-align:center; color: var(--text-tertiary); transition: transform .2s; flex-shrink:0; }
+  .accordion-item.open .accordion-icon{ transform: rotate(45deg); }
+  .accordion-body{ max-height:0; overflow:hidden; transition: max-height .25s ease; }
+  .accordion-body-inner{ padding:0 20px 18px; color: var(--text-secondary); font-size:14.3px; }
+  .accordion-body-inner code{ background: var(--bg-sunken); padding:1px 6px; border-radius:4px; font-size:12.8px; color: var(--accent-ink); }
+
+  /* ===== DASHBOARD MOCKUP (bueno vs cargado) ===== */
+  .mockup-toggle{ display:flex; gap:8px; margin: 22px 0 14px; }
+  .mockup-btn{
+    font-family: var(--font-mono); font-size:12.5px; padding:9px 16px; border-radius:8px; cursor:pointer;
+    border:1px solid var(--border); background: var(--bg-card); color: var(--text-secondary);
+  }
+  .mockup-btn.active{ background: var(--accent); color:#fff; border-color: var(--accent); }
+  .mockup-frame{ background: var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:18px; }
+  .mockup-panel{ display:none; }
+  .mockup-panel.active{ display:block; }
+
+  .m-grid-good{ display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-bottom:10px; }
+  .m-kpi{ background: var(--accent-dim); border:1px solid var(--border); border-radius:8px; padding:12px; }
+  .m-kpi .n{ font-family: var(--font-display); font-weight:800; font-size:22px; color: var(--accent-ink); }
+  .m-kpi .l{ font-family: var(--font-mono); font-size:10px; color: var(--text-tertiary); text-transform:uppercase; }
+  .m-chart-good{ background: var(--bg-sunken); border:1px solid var(--border); border-radius:8px; height:90px; display:flex; align-items:flex-end; gap:5px; padding:10px; }
+  .m-chart-good div{ background: var(--accent); flex:1; border-radius:3px 3px 0 0; }
+
+  .m-grid-bad{ display:grid; grid-template-columns: repeat(4,1fr); gap:6px; }
+  .m-tile-bad{ border-radius:6px; height:56px; display:flex; align-items:center; justify-content:center; font-family: var(--font-mono); font-size:9px; color:#fff; text-align:center; padding:3px; }
+  .mockup-note{ font-size:13px; color: var(--text-tertiary); margin-top:12px; }
+
+  /* ===== CHART PICKER ===== */
+  .picker{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin:24px 0; }
+  @media (max-width:640px){ .picker{ grid-template-columns:1fr; } }
+  .picker-questions{ display:flex; flex-direction:column; gap:8px; }
+  .pq-btn{
+    text-align:left; font-size:13.8px; padding:12px 14px; border-radius:9px; border:1px solid var(--border);
+    background: var(--bg-card); color: var(--text-secondary); cursor:pointer; transition: all .15s;
+  }
+  .pq-btn:hover{ border-color: var(--accent); }
+  .pq-btn.active{ border-color: var(--accent); background: var(--accent-dim); color: var(--accent-ink); font-weight:600; }
+  .picker-result{ background: var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+  .picker-result .chart-icon{ font-size:40px; margin-bottom:10px; }
+  .picker-result .chart-name{ font-family: var(--font-display); font-weight:700; font-size:17px; margin-bottom:6px; }
+  .picker-result .chart-why{ font-size:13.3px; color: var(--text-secondary); }
+
+  footer{ padding:50px 44px 70px; max-width:none; color: var(--text-tertiary); font-size:13.3px; }
+
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="sidenav" id="sidenav">
+    <div class="sidenav-brand"><span class="sw"></span>BI · Looker Studio</div>
+    <ol id="navlist"></ol>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="hero-kicker">Guía de referencia</div>
+      <h1>Antes de tocar un <em>solo gráfico</em>, hazte la pregunta correcta.</h1>
+      <p class="hero-lead">
+        Acompañamiento para la sesión de Business Intelligence con Looker Studio. Consúltala mientras
+        seguimos la demo en clase — no hace falta que copies nada, esto se queda contigo después.
+      </p>
+      <div class="badge-row">
+        <span class="badge">Looker Studio</span>
+        <span class="badge">BigQuery</span>
+        <span class="badge">Diseño de dashboards</span>
+        <span class="badge">KPIs</span>
+      </div>
+    </section>
+
+    <!-- ===== 1. QUÉ ES ===== -->
+    <section class="section" id="que-es">
+      <div class="eyebrow">Fundamentos</div>
+      <h2 class="section-title">¿Qué es Looker Studio y por qué existe?</h2>
+      <p class="lead">Antes de la demo, el contexto que le da sentido a todo lo demás.</p>
+
+      <p>Looker Studio (antes Google Data Studio) es la herramienta gratuita de Google para construir informes y dashboards interactivos, conectados directamente a fuentes de datos como hojas de cálculo, Google Analytics, Google Ads o BigQuery.</p>
+
+      <div class="callout warn">
+        <div class="callout-title">⚠ Un matiz que suele confundirse</div>
+        <p><strong>Looker Studio</strong> no es lo mismo que <strong>Looker</strong> (sin "Studio"). Looker es la plataforma empresarial de BI que Google también posee, con su propio lenguaje de modelado semántico llamado LookML y gobernanza de datos centralizada. Looker Studio es la herramienta gratuita y sencilla, orientada a que cualquiera pueda montar un informe sin pedirle nada a un equipo de datos. Son productos distintos — vale la pena saber distinguirlos.</p>
+      </div>
+
+      <h3 style="margin-top:8px; margin-bottom:12px; font-size:18px;">Cómo ayuda a las organizaciones</h3>
+      <div class="card-grid">
+        <div class="concept-card"><div class="k">Acceso</div><h4>Democratiza los datos</h4><p>Un responsable de marketing o comercial consulta sus métricas sin pedir una query a nadie.</p></div>
+        <div class="concept-card"><div class="k">Eficiencia</div><h4>Sustituye el reporting manual</h4><p>Informes que se armaban a mano cada semana en Excel se actualizan solos.</p></div>
+        <div class="concept-card"><div class="k">Consenso</div><h4>Fuente única de verdad</h4><p>Todo el mundo mira el mismo número con la misma definición — se acaban los "yo tengo otro dato".</p></div>
+        <div class="concept-card"><div class="k">Comunicación</div><h4>Traduce a no-técnicos</h4><p>Convierte tablas y queries en algo que se entiende de un vistazo.</p></div>
+      </div>
+
+      <h3 style="margin-top:20px; margin-bottom:12px; font-size:18px;">Ventajas y limitaciones</h3>
+      <div class="card-grid">
+        <div class="concept-card good"><div class="k" style="color:var(--accent)">✓ Ventaja</div><p style="color:var(--text-primary)">Gratuito, sin límite de usuarios ni licencias por puesto.</p></div>
+        <div class="concept-card good"><div class="k" style="color:var(--accent)">✓ Ventaja</div><p style="color:var(--text-primary)">Conectores nativos con BigQuery, Sheets, GA4, Ads y cientos de fuentes de terceros.</p></div>
+        <div class="concept-card good"><div class="k" style="color:var(--accent)">✓ Ventaja</div><p style="color:var(--text-primary)">Compartir un dashboard es tan fácil como compartir un enlace.</p></div>
+        <div class="concept-card bad"><div class="k" style="color:var(--red)">✕ Límite</div><p style="color:var(--text-primary)">Rendimiento pobre con datasets muy grandes si no se preagregan en origen.</p></div>
+        <div class="concept-card bad"><div class="k" style="color:var(--red)">✕ Límite</div><p style="color:var(--text-primary)">Personalización visual más limitada que Tableau o Power BI.</p></div>
+        <div class="concept-card bad"><div class="k" style="color:var(--red)">✕ Límite</div><p style="color:var(--text-primary)">Sin modelado semántico gobernado — cada informe define sus propios cálculos.</p></div>
+      </div>
+
+      <h3 style="margin-top:20px; margin-bottom:12px; font-size:18px;">Ejemplos reales de uso</h3>
+      <div class="card-grid">
+        <div class="concept-card"><div class="k">Agencias</div><h4>Reporting a clientes</h4><p>Consolidan Google Ads, Meta Ads y GA4 en un dashboard que el cliente consulta cuando quiere, sin pedir un informe por email.</p></div>
+        <div class="concept-card"><div class="k">E-commerce</div><h4>Ventas + marketing</h4><p>Cruzan ventas de Shopify/Amazon con gasto publicitario para calcular margen neto en tiempo real.</p></div>
+        <div class="concept-card"><div class="k">SEO</div><h4>Search Console</h4><p>Detectan caídas de tráfico o posicionamiento sin exportar CSVs a mano cada semana.</p></div>
+        <div class="concept-card"><div class="k">Dirección</div><h4>Dashboards ejecutivos</h4><p>Una pantalla con 4-5 números clave, pensada para mirarse 30 segundos antes de una reunión.</p></div>
+      </div>
+    </section>
+
+    <!-- ===== 2. CONEXIÓN BIGQUERY ===== -->
+    <section class="section" id="conexion">
+      <div class="eyebrow">Configuración</div>
+      <h2 class="section-title">Conectando con BigQuery</h2>
+      <p class="lead">Dos formas de traer los datos, con implicaciones muy distintas.</p>
+
+      <table class="dtable">
+        <tr><th>Opción</th><th>Qué hace</th><th>Cuándo usarla</th></tr>
+        <tr><td>Tabla directa</td><td>Looker Studio recibe todas las filas y columnas crudas; la agregación ocurre dentro de la herramienta</td><td>Exploración rápida, prototipos</td></tr>
+        <tr><td>Consulta personalizada</td><td>Se preagregan y filtran los datos <em>antes</em> de que lleguen a Looker Studio</td><td>Dashboards en producción, datasets grandes</td></tr>
+      </table>
+
+      <div class="callout info">
+        <div class="callout-title">La conexión con lo que ya sabéis de BigQuery</div>
+        <p>BigQuery cobra por bytes escaneados. Una query de origen bien escrita — con filtro de fechas y solo las columnas necesarias — reduce el coste y la latencia de cada refresco del dashboard. Traer una tabla completa con 50 columnas cuando el dashboard solo necesita 6 es tirar dinero.</p>
+      </div>
+
+      <h3 style="margin:22px 0 12px; font-size:18px;">Vocabulario que vas a necesitar</h3>
+      <table class="dtable">
+        <tr><th>Concepto</th><th>Qué es</th></tr>
+        <tr><td>Dimensión</td><td>Atributo categórico o temporal (país, categoría de producto, fecha)</td></tr>
+        <tr><td>Métrica</td><td>Valor numérico agregable (ingresos, nº de pedidos, AOV)</td></tr>
+        <tr><td>Agregación</td><td>Cómo se resume una métrica al agrupar (SUM, AVG, COUNT DISTINCT) — revísala siempre</td></tr>
+        <tr><td>Campo calculado</td><td>Fórmula nueva construida a partir de otros campos, definida en el propio informe</td></tr>
+        <tr><td>Control de fecha</td><td>Filtro global que afecta a todos los gráficos del informe a la vez</td></tr>
+      </table>
+
+      <div class="callout warn">
+        <div class="callout-title">⚠ Cuidado con las medias de medias</div>
+        <p>Si <code class="mono">AOV = Ingresos / Nº pedidos</code>, promediar una columna de AOV ya calculada por fila da un resultado sin sentido si los grupos tienen tamaños distintos. Calcúlalo siempre como campo calculado sobre los totales agregados, nunca promediando un ratio ya hecho.</p>
+      </div>
+    </section>
+
+    <!-- ===== 3. JERARQUÍA ===== -->
+    <section class="section" id="jerarquia">
+      <div class="eyebrow">Diseño</div>
+      <h2 class="section-title">Jerarquía visual</h2>
+      <p class="lead">La posición y el tamaño comunican importancia antes que el propio dato.</p>
+
+      <table class="dtable">
+        <tr><th>Zona</th><th>Qué va aquí</th></tr>
+        <tr><td>Arriba, grande</td><td>Los 3-5 KPIs que responden a la pregunta más importante</td></tr>
+        <tr><td>Centro</td><td>La tendencia en el tiempo de la métrica principal</td></tr>
+        <tr><td>Abajo / lateral</td><td>El detalle: tablas, desgloses, comparativas</td></tr>
+      </table>
+      <p class="muted">La mirada en una pantalla occidental sigue patrones predecibles (en Z o en F) — lo primero que se mira es la esquina superior izquierda. Ahí va lo más importante, no un logo decorativo.</p>
+    </section>
+
+    <!-- ===== 4. ELECCIÓN DE GRÁFICO (interactivo) ===== -->
+    <section class="section" id="graficos">
+      <div class="eyebrow">Diseño</div>
+      <h2 class="section-title">Elige el gráfico según la pregunta</h2>
+      <p class="lead">Pulsa una pregunta de negocio y comprueba qué tipo de gráfico responde mejor.</p>
+
+      <div class="picker">
+        <div class="picker-questions" id="pickerQuestions"></div>
+        <div class="picker-result" id="pickerResult">
+          <div class="chart-icon">👆</div>
+          <div class="chart-name">Elige una pregunta</div>
+          <div class="chart-why">El resultado aparece aquí</div>
+        </div>
+      </div>
+
+      <div class="callout danger">
+        <div class="callout-title">⚠ El gráfico más mal utilizado</div>
+        <p>Los gráficos de tarta (pie charts) son, con diferencia, el tipo más abusado en dashboards de empresa. Con más de 3-4 categorías, comparar ángulos es casi imposible para el ojo humano. Casi siempre una barra ordenada comunica lo mismo, mejor.</p>
+      </div>
+    </section>
+
+    <!-- ===== 5. COLORIMETRÍA ===== -->
+    <section class="section" id="color">
+      <div class="eyebrow">Diseño</div>
+      <h2 class="section-title">Colorimetría</h2>
+      <p class="lead">El color comunica significado — o resta, si se usa sin criterio.</p>
+
+      <ul style="padding-left:20px; color:var(--text-secondary); margin-bottom:10px;">
+        <li style="margin-bottom:8px;">Paleta limitada: 2-3 colores principales + una escala de grises para el resto</li>
+        <li style="margin-bottom:8px;">El color debe significar siempre lo mismo dentro del mismo informe</li>
+        <li style="margin-bottom:8px;">Cuidado con rojo/verde como único código — añade siempre una segunda señal (flecha, signo +/-) por accesibilidad</li>
+        <li style="margin-bottom:8px;">El color se reserva para <strong>resaltar</strong>, no para decorar</li>
+      </ul>
+    </section>
+
+    <!-- ===== 6. ERRORES COMUNES + MOCKUP ===== -->
+    <section class="section" id="errores">
+      <div class="eyebrow">Diseño</div>
+      <h2 class="section-title">Errores comunes</h2>
+      <p class="lead">Compara los dos mockups — el mismo dato, dos formas muy distintas de mostrarlo.</p>
+
+      <div class="mockup-toggle">
+        <button class="mockup-btn active" data-panel="m-good">Bien diseñado</button>
+        <button class="mockup-btn" data-panel="m-bad">Sobrecargado</button>
+      </div>
+
+      <div class="mockup-frame">
+        <div class="mockup-panel active" id="m-good">
+          <div class="m-grid-good">
+            <div class="m-kpi"><div class="n">€128k</div><div class="l">Ingresos ↑12%</div></div>
+            <div class="m-kpi"><div class="n">1.240</div><div class="l">Pedidos ↑8%</div></div>
+            <div class="m-kpi"><div class="n">€103</div><div class="l">Ticket medio →</div></div>
+          </div>
+          <div class="m-chart-good">
+            <div style="height:40%"></div><div style="height:55%"></div><div style="height:48%"></div>
+            <div style="height:70%"></div><div style="height:65%"></div><div style="height:82%"></div>
+            <div style="height:90%"></div>
+          </div>
+          <p class="mockup-note">3 KPIs, una tendencia, paleta de un solo color con distintas intensidades. Se lee en 5 segundos.</p>
+        </div>
+        <div class="mockup-panel" id="m-bad">
+          <div class="m-grid-bad">
+            <div class="m-tile-bad" style="background:#E85D75">Pie 3D ventas</div>
+            <div class="m-tile-bad" style="background:#5B8DEF">Barras arcoíris</div>
+            <div class="m-tile-bad" style="background:#F2A93B">Gauge decorativo</div>
+            <div class="m-tile-bad" style="background:#8E5BEF">Mapa sin filtro</div>
+            <div class="m-tile-bad" style="background:#2FC58B">Tabla 40 cols</div>
+            <div class="m-tile-bad" style="background:#EF5BA1">Donut anidado</div>
+            <div class="m-tile-bad" style="background:#4BC0D9">KPI eje truncado</div>
+            <div class="m-tile-bad" style="background:#D9A34B">Icono decorativo</div>
+          </div>
+          <p class="mockup-note">8 elementos compitiendo, sin jerarquía, sin paleta consistente. ¿Qué te llevarías en 10 segundos? Probablemente nada.</p>
+        </div>
+      </div>
+
+      <h3 style="margin:24px 0 12px; font-size:18px;">Checklist de errores a evitar</h3>
+      <div class="card-grid">
+        <div class="concept-card bad"><p style="color:var(--text-primary)"><strong>Sobrecarga:</strong> responder 15 preguntas en una sola pantalla</p></div>
+        <div class="concept-card bad"><p style="color:var(--text-primary)"><strong>Eje Y truncado:</strong> exagera diferencias pequeñas sin motivo real</p></div>
+        <div class="concept-card bad"><p style="color:var(--text-primary)"><strong>Chartjunk:</strong> sombras, 3D, iconos que no aportan información</p></div>
+        <div class="concept-card bad"><p style="color:var(--text-primary)"><strong>Sin pregunta:</strong> poner gráficos antes de saber qué decisión apoyan</p></div>
+      </div>
+    </section>
+
+    <!-- ===== 7. KPIs ===== -->
+    <section class="section" id="kpis">
+      <div class="eyebrow">Contenido</div>
+      <h2 class="section-title">Elegir KPIs que importen</h2>
+      <p class="lead">La pregunta que filtra un buen KPI de una vanity metric.</p>
+
+      <div class="callout info">
+        <div class="callout-title">La prueba del KPI</div>
+        <p>Antes de añadir cualquier métrica al dashboard, pregúntate: <strong>si este número cambia, ¿qué decisión de negocio cambiaría?</strong> Si la respuesta es "ninguna", no es un KPI — es decoración. Esta es la pregunta que usarás en el ejercicio para justificar cada KPI que elijáis.</p>
+      </div>
+
+      <table class="dtable">
+        <tr><th>KPI de ejemplo</th><th>Por qué importa</th></tr>
+        <tr><td>Ingresos totales</td><td>La pregunta número uno de cualquier negocio: ¿vamos mejor o peor que antes?</td></tr>
+        <tr><td>Nº de pedidos</td><td>Distingue si el crecimiento viene de más volumen o de tickets más caros</td></tr>
+        <tr><td>Ticket medio (AOV)</td><td>Indica si el negocio depende de vender mucho barato o poco caro</td></tr>
+        <tr><td>Top categorías</td><td>Dónde está el negocio de verdad — orienta stock y marketing</td></tr>
+      </table>
+    </section>
+
+    <!-- ===== 8. GLOSARIO ===== -->
+    <section class="section" id="glosario">
+      <div class="eyebrow">Referencia</div>
+      <h2 class="section-title">Glosario</h2>
+      <p class="lead">Para consulta rápida durante la demo o el reto.</p>
+      <div id="accordionList"></div>
+    </section>
+
+    <footer>
+      <p>Guía de referencia — BI con Looker Studio.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+// NAV + SCROLLSPY
+(function(){
+  const titles = {
+    "que-es": "¿Qué es Looker Studio?",
+    "conexion": "Conexión con BigQuery",
+    "jerarquia": "Jerarquía visual",
+    "graficos": "Elección de gráfico",
+    "color": "Colorimetría",
+    "errores": "Errores comunes",
+    "kpis": "Elegir KPIs",
+    "glosario": "Glosario",
+  };
+  const navlist = document.getElementById("navlist");
+  const sections = Object.keys(titles).map(id => document.getElementById(id)).filter(Boolean);
+  sections.forEach(sec => {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = "#" + sec.id; a.textContent = titles[sec.id]; a.dataset.target = sec.id;
+    li.appendChild(a); navlist.appendChild(li);
+  });
+  const navLinks = navlist.querySelectorAll("a");
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const link = navlist.querySelector(`a[data-target="${entry.target.id}"]`);
+      if(!link) return;
+      if(entry.isIntersecting){ navLinks.forEach(l=>l.classList.remove("active")); link.classList.add("active"); }
+    });
+  }, { rootMargin: "-15% 0px -70% 0px", threshold:0 });
+  sections.forEach(sec => observer.observe(sec));
+})();
+
+// ACCORDION GLOSARIO
+(function(){
+  const terms = [
+    ["Dimensión","dato","Atributo categórico o temporal usado para agrupar datos (país, fecha, categoría de producto)."],
+    ["Métrica","dato","Valor numérico agregable: ingresos, nº de pedidos, AOV."],
+    ["Scorecard","gráfico","Tarjeta con un único número destacado, normalmente con comparación a un periodo anterior."],
+    ["Campo calculado","función","Fórmula nueva definida dentro del informe a partir de otros campos existentes."],
+    ["Control de informe","interacción","Filtro interactivo (fecha, categoría...) que afecta a varios gráficos a la vez."],
+    ["Blending de datos","función","Combinar en un mismo gráfico datos provenientes de dos fuentes distintas."],
+    ["Vanity metric","concepto","Métrica que sube casi siempre pero no informa ninguna decisión real de negocio."],
+    ["Chartjunk","concepto","Cualquier elemento visual (sombras, 3D, iconos decorativos) que no aporta información."],
+    ["AOV","métrica","Average Order Value — ticket medio: ingresos totales dividido entre nº de pedidos."],
+  ];
+  const list = document.getElementById("accordionList");
+  terms.forEach(([term, tag, def]) => {
+    const item = document.createElement("div");
+    item.className = "accordion-item";
+    item.innerHTML = `<div class="accordion-head"><h4><span class="tag">${tag}</span>${term}</h4><span class="accordion-icon">+</span></div><div class="accordion-body"><div class="accordion-body-inner"><p>${def}</p></div></div>`;
+    list.appendChild(item);
+    const head = item.querySelector(".accordion-head");
+    const body = item.querySelector(".accordion-body");
+    head.addEventListener("click", () => {
+      const isOpen = item.classList.contains("open");
+      if(isOpen){ body.style.maxHeight = null; item.classList.remove("open"); }
+      else{ item.classList.add("open"); body.style.maxHeight = body.scrollHeight + "px"; }
+    });
+  });
+})();
+
+// MOCKUP TOGGLE
+(function(){
+  document.querySelectorAll(".mockup-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll(".mockup-btn").forEach(b=>b.classList.remove("active"));
+      document.querySelectorAll(".mockup-panel").forEach(p=>p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.panel).classList.add("active");
+    });
+  });
+})();
+
+// CHART PICKER
+(function(){
+  const data = [
+    ["¿Cómo evoluciona esto en el tiempo?", "📈", "Línea temporal", "El ojo sigue tendencias mejor en una línea continua que en puntos sueltos."],
+    ["¿Cómo se compara A frente a B?", "📊", "Barras", "Comparar longitudes es más preciso que comparar ángulos o áreas."],
+    ["¿Cómo se reparte el total entre partes?", "🟢", "Barra apilada o donut (máx. 4-5 categorías)", "Más allá de 5 categorías se vuelve ilegible — evita el pie chart clásico."],
+    ["¿Hay relación entre dos variables?", "✦", "Dispersión (scatter)", "Muestra correlación entre dos métricas de un solo vistazo."],
+    ["¿Cuál es el detalle exacto fila a fila?", "▤", "Tabla", "A veces el dato exacto importa más que la forma visual."],
+  ];
+  const qWrap = document.getElementById("pickerQuestions");
+  const result = document.getElementById("pickerResult");
+  data.forEach((row, i) => {
+    const btn = document.createElement("button");
+    btn.className = "pq-btn";
+    btn.textContent = row[0];
+    btn.addEventListener("click", () => {
+      qWrap.querySelectorAll(".pq-btn").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      result.innerHTML = `<div class="chart-icon">${row[1]}</div><div class="chart-name">${row[2]}</div><div class="chart-why">${row[3]}</div>`;
+    });
+    qWrap.appendChild(btn);
+  });
+})();
+</script>
+</body>
+</html>
