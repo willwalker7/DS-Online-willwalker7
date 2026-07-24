@@ -1,0 +1,41 @@
+NOTAS DE PRESENTACIÓN — EJERCICIO BI LOOKER STUDIO
+================================================
+
+PREGUNTA DE NEGOCIO
+¿Cuál es el rendimiento comercial de la empresa y qué factores, como las ventas, el beneficio, las categorías, los canales de adquisición y los mercados, están impulsando los resultados obtenidos?
+
+CANVAS DE KPIs
+
+  KPI 1: Ventas totales
+    Pregunta que responde: ¿Cuál es el volumen total de ventas generado?
+    Gráfico: Scorecard
+    Justificación: Es el principal indicador del rendimiento económico del negocio y ofrece una visión inmediata del volumen de ventas.
+
+  KPI 2: Beneficio total
+    Pregunta que responde: ¿El negocio está siendo rentable?
+    Gráfico: Scorecard
+    Justificación: No basta con vender mucho; este KPI muestra el beneficio obtenido descontando el coste de los productos.
+
+  KPI 3: Número de pedidos
+    Pregunta que responde: ¿Cuántos pedidos se han realizado?
+    Gráfico: Scorecard
+    Justificación: Permite conocer el volumen de actividad comercial independientemente del importe de las ventas.
+
+  KPI 4: Ticket medio (AOV)
+    Pregunta que responde: ¿Cuánto gasta de media un cliente por pedido?
+    Gráfico: Scorecard
+    Justificación: Ayuda a identificar si el crecimiento proviene de un mayor número de pedidos o de un mayor importe por pedido.
+
+  KPI 5: Distribución de ventas por canal
+    Pregunta que responde: ¿Qué canal de adquisición genera un mayor volumen de ventas?
+    Gráfico: Gráfico de dona con valores relativos
+    Justificación: Permite identificar qué canales de adquisición generan una mayor proporción de las ventas, facilitando la toma de decisiones sobre la distribución de recursos e inversión en marketing.
+
+
+LA HISTORIA
+  Insight: El dashboard muestra una visión global del rendimiento comercial de la empresa. Las ventas mantienen una evolución relativamente estable durante el año, con incrementos destacados en los meses de verano. La categoría Accessories lidera el volumen de ventas, mientras que el canal Organic representa el mayor porcentaje de adquisición de clientes. Además, Alemania es el mercado con mayor volumen de ventas y beneficio, y el análisis detallado de productos permite identificar tanto los artículos más rentables como aquellos con un rendimiento inferior.
+  Recomendación: Se recomienda reforzar la estrategia comercial en los canales con mayor rendimiento, especialmente Organic, potenciar las categorías con mejores resultados y analizar las causas del bajo beneficio de determinados productos para mejorar su rentabilidad. Asimismo, el comportamiento observado en los países con mejores resultados puede servir como referencia para optimizar las acciones comerciales en otros mercados.
+
+PREPARACIÓN STAKEHOLDER
+  Pregunta practicada: Me habéis enseñado el qué. ¿Cuál es el porqué?
+  Respuesta: El dashboard se ha diseñado para facilitar la toma de decisiones comerciales proporcionando una visión global del rendimiento de la empresa. Se han seleccionado indicadores como las ventas, el beneficio, el número de pedidos y el ticket medio para evaluar rápidamente el estado del negocio. Además, el análisis por categorías, canales de adquisición, países y productos permite identificar qué áreas generan mejores resultados y detectar posibles oportunidades de mejora. De este modo, no solo se muestra qué está ocurriendo, sino que se proporciona la información necesaria para entender dónde centrar futuras acciones comerciales.
