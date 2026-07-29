@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redes Convolucionales — Guía visual</title>
+<style>
+  :root{
+    --bg: #0b0e14;
+    --bg-panel: #12161f;
+    --bg-panel-2: #171c27;
+    --border: #232938;
+    --text: #dbe2f0;
+    --text-dim: #8a93a8;
+    --accent: #5fd0c0;
+    --accent-2: #e8a23d;
+    --accent-3: #d0688a;
+    --mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    --sans: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0; background: var(--bg); color: var(--text);
+    font-family: var(--sans); line-height:1.55;
+    padding-bottom: 60px;
+  }
+  a{ color: var(--accent); }
+  header.hero{
+    padding: 56px 24px 40px; text-align:center;
+    border-bottom: 1px solid var(--border);
+    background: radial-gradient(ellipse at top, #131a24 0%, #0b0e14 70%);
+  }
+  header.hero .eyebrow{
+    font-family: var(--mono); font-size: 13px; letter-spacing: .12em;
+    color: var(--accent); text-transform: uppercase; margin-bottom: 14px;
+  }
+  header.hero h1{
+    font-size: clamp(28px, 5vw, 44px); margin: 0 0 14px; font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  header.hero p{ color: var(--text-dim); max-width: 640px; margin: 0 auto; font-size: 16px; }
+
+  nav.tabs{
+    position: sticky; top:0; z-index: 50;
+    display:flex; gap: 4px; overflow-x:auto; padding: 10px 16px;
+    background: rgba(11,14,20,0.92); backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav.tabs button{
+    flex: none; font-family: var(--mono); font-size: 13px; color: var(--text-dim);
+    background: transparent; border: 1px solid transparent; padding: 8px 14px;
+    border-radius: 20px; cursor: pointer; white-space: nowrap; transition: .15s;
+  }
+  nav.tabs button:hover{ color: var(--text); }
+  nav.tabs button.active{ color: var(--bg); background: var(--accent); font-weight:600; }
+
+  main{ max-width: 920px; margin: 0 auto; padding: 40px 20px; }
+  section.panel{ display:none; animation: fade .25s ease; }
+  section.panel.active{ display:block; }
+  @keyframes fade{ from{opacity:0; transform: translateY(4px);} to{opacity:1; transform:none;} }
+
+  h2.section-title{
+    font-size: 22px; margin: 0 0 6px; display:flex; align-items:center; gap:10px;
+  }
+  h2.section-title .num{
+    font-family: var(--mono); font-size: 13px; color: var(--bg); background: var(--accent);
+    width: 26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    flex: none;
+  }
+  p.lede{ color: var(--text-dim); margin: 0 0 26px; font-size: 15px; }
+
+  .card{
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px; margin-bottom: 20px;
+  }
+  .card h3{ margin-top:0; font-size: 15px; color: var(--accent); font-family: var(--mono); font-weight: 600;}
+
+  .grid-pixels{ display:inline-grid; gap:2px; }
+  .cell{
+    width: 34px; height:34px; display:flex; align-items:center; justify-content:center;
+    font-family: var(--mono); font-size: 11px; border-radius: 3px; color: #0b0e14; font-weight:600;
+    position: relative; transition: transform .12s;
+  }
+  .cell.pad{ background: repeating-linear-gradient(45deg, #1b2130, #1b2130 4px, #232938 4px, #232938 8px); color: var(--text-dim); }
+  .cell.window{ outline: 2px solid var(--accent-2); outline-offset: -2px; z-index:2; }
+  .cell.out-active{ outline: 2px solid var(--accent-3); }
+
+  .row-flex{ display:flex; gap: 30px; flex-wrap: wrap; align-items:flex-start; }
+  .controls{ display:flex; flex-wrap:wrap; gap: 10px; margin: 14px 0 18px; }
+  select, button.btn{
+    font-family: var(--sans); font-size: 13px; background: var(--bg-panel-2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor:pointer;
+  }
+  button.btn{ font-weight: 600; }
+  button.btn:hover{ border-color: var(--accent); color: var(--accent); }
+  button.btn:disabled{ opacity:.4; cursor:not-allowed; }
+  button.btn.primary{ background: var(--accent); color: #06110f; border-color: var(--accent); }
+
+  .formula-box{
+    font-family: var(--mono); font-size: 13px; background: #0d1119; border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px; color: var(--accent-2); overflow-x:auto; white-space: pre;
+    min-height: 20px;
+  }
+  .legend{ font-size: 12.5px; color: var(--text-dim); margin-top:10px; }
+  .legend span.swatch{ display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:middle;}
+
+  table.kernel-table{ border-collapse: collapse; font-family: var(--mono); font-size: 13px; }
+  table.kernel-table td{ border:1px solid var(--border); width: 34px; height:34px; text-align:center; color: var(--accent-2); }
+
+  .badge{ display:inline-block; font-family: var(--mono); font-size: 11px; padding: 3px 8px; border-radius: 5px;
+    background: rgba(95,208,192,0.12); color: var(--accent); margin-right:6px;}
+  .badge.warn{ background: rgba(232,162,61,0.12); color: var(--accent-2); }
+  .badge.fix{ background: rgba(208,104,138,0.14); color: var(--accent-3); }
+
+  .arch-svg{ width:100%; height:auto; display:block; }
+  .arch-wrap{ overflow-x:auto; }
+
+  dl.glossary dt{ font-family: var(--mono); color: var(--accent); font-weight:600; margin-top:16px; }
+  dl.glossary dd{ margin: 4px 0 0; color: var(--text-dim); }
+
+  .stat-row{ display:flex; gap:16px; flex-wrap:wrap; margin: 14px 0; }
+  .stat{ background: var(--bg-panel-2); border:1px solid var(--border); border-radius:10px; padding: 14px 18px; min-width: 140px; }
+  .stat .num{ font-family: var(--mono); font-size: 22px; color: var(--accent); font-weight:700; }
+  .stat .lab{ font-size: 12px; color: var(--text-dim); margin-top:2px; }
+
+  footer{ text-align:center; color: var(--text-dim); font-size: 12.5px; padding: 30px 20px 0; }
+
+  .classics-grid{ display:flex; flex-direction:column; gap:16px; margin-bottom: 20px; }
+  .classic-card{
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 18px; transition: border-color .2s, transform .15s;
+  }
+  .classic-card:hover{ border-color: var(--accent); transform: translateY(-2px); }
+  .classic-card h4{ margin: 0 0 4px; font-size: 16px; color: var(--text); }
+  .classic-card .year{ font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-bottom: 10px; }
+  .classic-card .idea{ font-size: 13.5px; color: var(--text-dim); margin: 8px 0; min-height: 55px; }
+  .classic-card .metrics{ display:flex; gap:10px; margin: 10px 0; }
+  .classic-card .metric{ font-family: var(--mono); font-size: 11px; background: var(--bg-panel-2); border-radius:6px; padding:4px 8px; color: var(--accent); }
+  .classic-card .usecase{ font-size: 12.5px; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; color: var(--text); }
+  .classic-card .usecase b{ color: var(--accent-2); }
+  .classic-card.hidden{ display:none; }
+  .mini-diagram-wrap{ overflow-x:auto; margin: 12px 0; padding: 10px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .mini-diagram-wrap svg{ display:block; }
+  .diagram-caption{ font-size: 11.5px; color: var(--text-dim); margin-top: 4px; font-style: italic; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="eyebrow">Sprint 16 · Unidad 1</div>
+  <h1>Redes Convolucionales, paso a paso</h1>
+  <p>Mueve el kernel, cambia el padding, calcula el pooling. Todo lo que vimos en clase, pero tocándolo con las manos.</p>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="tensor" class="active">1 · Imagen = tensor</button>
+  <button data-tab="conv">2 · Convolución interactiva</button>
+  <button data-tab="padding">3 · Padding &amp; Stride</button>
+  <button data-tab="depth">4 · Profundidad de canales</button>
+  <button data-tab="pool">5 · Max Pooling</button>
+  <button data-tab="arch">6 · Arquitectura completa</button>
+  <button data-tab="classics">7 · Arquitecturas clásicas</button>
+  <button data-tab="results">8 · Resultados reales</button>
+  <button data-tab="glossary">9 · Glosario</button>
+</nav>
+
+<main>
+
+  <!-- 1. TENSOR -->
+  <section class="panel active" data-panel="tensor">
+    <h2 class="section-title"><span class="num">1</span> Una imagen a color es un tensor de 4 dimensiones</h2>
+    <p class="lede">X_train.shape = (4000, 32, 32, 3) → (nº imágenes, alto, ancho, canales)</p>
+    <div class="card">
+      <h3>¿Por qué 3 canales?</h3>
+      <p>Cada píxel no es un único número, son tres: <b style="color:#ff8080">rojo</b>, <b style="color:#7dcf7d">verde</b> y <b style="color:#7ab8ff">azul</b>, cada uno entre 0 y 255. Por eso cada imagen es un "cubo" (3D) y no una matriz (2D) como en escala de grises. Y ojo: <b>los tres canales llevan información distinta</b> — no es el mismo valor repetido tres veces con distinto color.</p>
+
+      <div class="controls" id="channelPills">
+        <button class="btn primary" data-ch="combined">🎨 Combinado (color real)</button>
+        <button class="btn" data-ch="r">Solo canal R</button>
+        <button class="btn" data-ch="g">Solo canal G</button>
+        <button class="btn" data-ch="b">Solo canal B</button>
+      </div>
+
+      <div id="channelDemo" class="grid-pixels" style="grid-template-columns: repeat(6, 44px);"></div>
+      <div class="formula-box" id="channelExplain" style="margin-top:14px;"></div>
+      <div class="legend" style="margin-top:8px;">Pulsa cada botón — verás que el patrón de R, G y B es distinto en cada uno, y que "Combinado" es literalmente la suma de los tres.</div>
+    </div>
+    <div class="card">
+      <h3>Escalado</h3>
+      <p>Antes de entrenar, dividimos entre 255 → rango 0–1 (en vez de 0–255). Esto ayuda a las funciones de activación y evita saturaciones. Algunas redes preentrenadas (transfer learning) exigen -1 a 1 en su lugar — siempre hay que mirar la documentación del modelo base.</p>
+    </div>
+  </section>
+
+  <!-- 2. CONVOLUCION -->
+  <section class="panel" data-panel="conv">
+    <h2 class="section-title"><span class="num">2</span> La convolución: barrido + producto matricial + suma</h2>
+    <p class="lede">Elige un kernel, pulsa "Siguiente paso" y observa cómo se genera cada píxel de salida.</p>
+
+    <div class="card">
+      <div class="controls">
+        <label style="font-size:13px; color:var(--text-dim);">Kernel:
+          <select id="kernelSelect">
+            <option value="identity">Identidad</option>
+            <option value="blur">Blur (difuminado)</option>
+            <option value="edge" selected>Detección de bordes (Sobel-like)</option>
+            <option value="sharpen">Sharpen (enfoque)</option>
+            <option value="random">Aleatorio (sin entrenar)</option>
+          </select>
+        </label>
+        <button class="btn" id="stepBtn">Siguiente paso ▸</button>
+        <button class="btn" id="playBtn">▶ Reproducir barrido</button>
+        <button class="btn" id="resetConvBtn">↺ Reiniciar</button>
+      </div>
+
+      <div class="row-flex">
+        <div>
+          <div class="legend" style="margin-bottom:6px;">Imagen de entrada (6×6)</div>
+          <div id="convInput" class="grid-pixels" style="grid-template-columns: repeat(6, 34px);"></div>
+        </div>
+        <div>
+          <div class="legend" style="margin-bottom:6px;">Kernel activo (3×3)</div>
+          <table class="kernel-table" id="kernelTable"></table>
+        </div>
+        <div>
+          <div class="legend" style="margin-bottom:6px;">Mapa de características de salida</div>
+          <div id="convOutput" class="grid-pixels"></div>
+        </div>
+      </div>
+
+      <div class="formula-box" id="convFormula">Pulsa "Siguiente paso" para empezar el barrido…</div>
+      <div class="legend"><span class="swatch" style="background:var(--accent-2);"></span>ventana actual sobre la entrada &nbsp;&nbsp;<span class="swatch" style="background:var(--accent-3);"></span>píxel de salida generado</div>
+    </div>
+
+    <div class="card">
+      <h3>Kernels predefinidos vs. kernels aprendidos</h3>
+      <p>Los kernels de "Identidad", "Blur", "Bordes" o "Sharpen" están <b>diseñados a mano</b> — son los que usa cualquier editor de fotos. Los kernels de una red convolucional, en cambio, se <b>inicializan aleatoriamente</b> y es la propia red la que decide, durante el entrenamiento, qué característica detectará cada uno. Prueba la opción "Aleatorio" para ver qué pinta tiene un filtro recién inicializado, antes de entrenar nada.</p>
+    </div>
+  </section>
+
+  <!-- 3. PADDING/STRIDE -->
+  <section class="panel" data-panel="padding">
+    <h2 class="section-title"><span class="num">3</span> Padding y stride — por qué cambia (o no) el tamaño de salida</h2>
+    <p class="lede"><span class="badge fix">Importante</span> sin padding, la salida SÍ es más pequeña que la entrada.</p>
+
+    <div class="card">
+      <div class="controls">
+        <label style="font-size:13px; color:var(--text-dim);">Modo:
+          <select id="paddingSelect">
+            <option value="valid">padding = "valid" (sin relleno)</option>
+            <option value="same" selected>padding = "same" (con relleno)</option>
+          </select>
+        </label>
+        <label style="font-size:13px; color:var(--text-dim);">Stride:
+          <select id="strideSelect">
+            <option value="1" selected>stride = 1</option>
+            <option value="2">stride = 2</option>
+          </select>
+        </label>
+      </div>
+      <div class="row-flex">
+        <div>
+          <div class="legend" style="margin-bottom:6px;">Entrada 6×6 (con o sin marco de padding)</div>
+          <div id="padInput" class="grid-pixels"></div>
+        </div>
+        <div>
+          <div class="legend" style="margin-bottom:6px;">Tamaño de salida resultante</div>
+          <div class="stat"><div class="num" id="padOutSize">–</div><div class="lab">dimensiones de salida (kernel 3×3)</div></div>
+        </div>
+      </div>
+      <div class="formula-box" id="padFormula"></div>
+    </div>
+  </section>
+
+  <!-- 4. DEPTH -->
+  <section class="panel" data-panel="depth">
+    <h2 class="section-title"><span class="num">4</span> La profundidad del kernel: no es plano, es un cubo</h2>
+    <p class="lede">Un kernel "de 3×3" en una imagen a color en realidad es de 3×3×3.</p>
+    <div class="card">
+      <h3>Primer bloque convolucional</h3>
+      <p>La imagen de entrada tiene 3 canales (RGB) → el kernel necesita 3 kernels apilados (uno por canal). El resultado de cada filtro es la <b>suma</b> de las tres convoluciones (una por canal) más un bias, colapsando los 3 canales en un único valor por posición.</p>
+      <div class="stat-row">
+        <div class="stat"><div class="num">64</div><div class="lab">filtros definidos</div></div>
+        <div class="stat"><div class="num">3×3×3</div><div class="lab">tamaño real de cada kernel</div></div>
+        <div class="stat"><div class="num">32×32×64</div><div class="lab">salida (mapas de características)</div></div>
+      </div>
+      <p style="font-size:13.5px; color:var(--text-dim);">Dato real verificado: AlexNet (Krizhevsky et al., 2012) usaba 96 filtros de tamaño 11×11×3 en su primera capa — mismo principio, otra escala.</p>
+    </div>
+    <div class="card">
+      <h3>Segundo bloque convolucional — el punto que más cuesta</h3>
+      <p>Tras el primer Max Pooling tenemos 64 mapas de 16×16 (ya no es "la imagen", son características). El segundo bloque convolucional <b>ya no mira la imagen original</b>: mira esos 64 mapas. Un kernel de 3×3 con 128 filtros aquí es en realidad de <b>3×3×64</b> — no genera 128×64 mapas, genera 128 mapas nuevos que condensan la información de los 64 anteriores.</p>
+      <div class="stat-row">
+        <div class="stat"><div class="num">128</div><div class="lab">filtros definidos</div></div>
+        <div class="stat"><div class="num">3×3×64</div><div class="lab">tamaño real de cada kernel</div></div>
+        <div class="stat"><div class="num">16×16×128</div><div class="lab">salida (mapas de características)</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. POOLING -->
+  <section class="panel" data-panel="pool">
+    <h2 class="section-title"><span class="num">5</span> Max Pooling — condensar quedándonos con lo más fuerte</h2>
+    <p class="lede">Divide el mapa en bloques y se queda con el valor máximo de cada uno.</p>
+    <div class="card">
+      <div class="controls">
+        <button class="btn" id="poolRandomBtn">🎲 Nuevos valores</button>
+        <button class="btn primary" id="poolComputeBtn">Calcular Max Pooling (2×2, stride 2)</button>
+      </div>
+      <div class="row-flex">
+        <div>
+          <div class="legend" style="margin-bottom:6px;">Mapa de características 4×4</div>
+          <div id="poolInput" class="grid-pixels" style="grid-template-columns: repeat(4, 40px);"></div>
+        </div>
+        <div>
+          <div class="legend" style="margin-bottom:6px;">Resultado 2×2</div>
+          <div id="poolOutput" class="grid-pixels" style="grid-template-columns: repeat(2, 40px);"></div>
+        </div>
+      </div>
+      <p style="font-size:13.5px; color:var(--text-dim); margin-top:14px;">Con esto, un mapa de 32×32 pasa a 16×16 — nos quedamos con una cuarta parte de los valores, pero conservando lo más destacado de cada zona.</p>
+    </div>
+  </section>
+
+  <!-- 6. ARCHITECTURE -->
+  <section class="panel" data-panel="arch">
+    <h2 class="section-title"><span class="num">6</span> La arquitectura completa de esta práctica</h2>
+    <p class="lede">Tal cual está definida en <code>prepare_model()</code> del notebook. Haz click en cualquier bloque, o dale a "Reproducir flujo" para ver cómo viaja el dato de principio a fin.</p>
+    <div class="card arch-wrap">
+      <div class="controls" style="margin-bottom:14px;">
+        <button class="btn primary" id="archPlayBtn">▶ Reproducir flujo</button>
+        <button class="btn" id="archResetBtn">↺ Reiniciar</button>
+      </div>
+      <svg class="arch-svg" viewBox="0 0 1180 270" xmlns="http://www.w3.org/2000/svg">
+        <style>
+          .box{ fill:#171c27; stroke:#232938; stroke-width:1; transition: stroke-width .2s, filter .2s; }
+          .box.conv{ stroke:#5fd0c0; }
+          .box.pool{ stroke:#e8a23d; }
+          .box.drop{ stroke:#d0688a; stroke-dasharray:4 3; }
+          .box.dense{ stroke:#7ab8ff; }
+          .lbl{ font-family: monospace; font-size:12px; fill:#dbe2f0; pointer-events:none; }
+          .sub{ font-family: monospace; font-size:10px; fill:#8a93a8; pointer-events:none; }
+          .arrow{ stroke:#3a4256; stroke-width:2; marker-end:url(#arrowhead); transition: stroke .2s; }
+          .arrow.lit{ stroke: var(--accent-3); }
+          .block{ cursor:pointer; }
+          .block:hover .box{ stroke-width:2.4; }
+          .block.active .box{ stroke-width:3; filter:url(#blockglow); }
+          #pulseDot{ transition: cx .55s cubic-bezier(.4,0,.2,1), cy .55s cubic-bezier(.4,0,.2,1), opacity .25s; }
+        </style>
+        <defs>
+          <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#3a4256"/>
+          </marker>
+          <filter id="blockglow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="5" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- Input -->
+        <g class="block" data-id="input">
+          <rect x="10" y="70" width="90" height="90" rx="8" class="box"/>
+          <text x="55" y="110" text-anchor="middle" class="lbl">Input</text>
+          <text x="55" y="128" text-anchor="middle" class="sub">32×32×3</text>
+        </g>
+        <line class="arrow" id="arrow-input-conv1" x1="100" y1="115" x2="130" y2="115"/>
+
+        <!-- Conv1 -->
+        <g class="block" data-id="conv1">
+          <rect x="132" y="60" width="100" height="110" rx="8" class="box conv"/>
+          <text x="182" y="100" text-anchor="middle" class="lbl">Conv2D</text>
+          <text x="182" y="118" text-anchor="middle" class="sub">64 filtros 3×3</text>
+          <text x="182" y="132" text-anchor="middle" class="sub">→ 32×32×64</text>
+        </g>
+        <line class="arrow" id="arrow-conv1-pool1" x1="232" y1="115" x2="262" y2="115"/>
+
+        <!-- Pool1 -->
+        <g class="block" data-id="pool1">
+          <rect x="264" y="65" width="90" height="100" rx="8" class="box pool"/>
+          <text x="309" y="105" text-anchor="middle" class="lbl">MaxPool</text>
+          <text x="309" y="123" text-anchor="middle" class="sub">2×2 → 16×16×64</text>
+        </g>
+        <line class="arrow" id="arrow-pool1-drop1" x1="354" y1="115" x2="384" y2="115"/>
+
+        <!-- Dropout1 -->
+        <g class="block" data-id="drop1">
+          <rect x="386" y="72" width="82" height="86" rx="8" class="box drop"/>
+          <text x="427" y="112" text-anchor="middle" class="lbl">Dropout</text>
+          <text x="427" y="128" text-anchor="middle" class="sub">rate 0.25</text>
+        </g>
+        <line class="arrow" id="arrow-drop1-conv2" x1="468" y1="115" x2="498" y2="115"/>
+
+        <!-- Conv2 -->
+        <g class="block" data-id="conv2">
+          <rect x="500" y="60" width="100" height="110" rx="8" class="box conv"/>
+          <text x="550" y="100" text-anchor="middle" class="lbl">Conv2D</text>
+          <text x="550" y="118" text-anchor="middle" class="sub">128 filtros 3×3×64</text>
+          <text x="550" y="132" text-anchor="middle" class="sub">→ 16×16×128</text>
+        </g>
+        <line class="arrow" id="arrow-conv2-pool2" x1="600" y1="115" x2="630" y2="115"/>
+
+        <!-- Pool2 -->
+        <g class="block" data-id="pool2">
+          <rect x="632" y="65" width="90" height="100" rx="8" class="box pool"/>
+          <text x="677" y="105" text-anchor="middle" class="lbl">MaxPool</text>
+          <text x="677" y="123" text-anchor="middle" class="sub">2×2 → 8×8×128</text>
+        </g>
+        <line class="arrow" id="arrow-pool2-drop2" x1="722" y1="115" x2="752" y2="115"/>
+
+        <!-- Dropout2 -->
+        <g class="block" data-id="drop2">
+          <rect x="754" y="72" width="82" height="86" rx="8" class="box drop"/>
+          <text x="795" y="112" text-anchor="middle" class="lbl">Dropout</text>
+          <text x="795" y="128" text-anchor="middle" class="sub">rate 0.25</text>
+        </g>
+        <line class="arrow" id="arrow-drop2-flatten" x1="836" y1="115" x2="866" y2="115"/>
+
+        <!-- Flatten -->
+        <g class="block" data-id="flatten">
+          <rect x="868" y="80" width="80" height="70" rx="8" class="box"/>
+          <text x="908" y="120" text-anchor="middle" class="lbl">Flatten</text>
+        </g>
+        <line class="arrow" id="arrow-flatten-dense1" x1="948" y1="115" x2="972" y2="115"/>
+
+        <!-- Dense -->
+        <g class="block" data-id="dense1">
+          <rect x="974" y="60" width="90" height="110" rx="8" class="box dense"/>
+          <text x="1019" y="105" text-anchor="middle" class="lbl">Dense</text>
+          <text x="1019" y="122" text-anchor="middle" class="sub">512, relu</text>
+        </g>
+
+        <!-- Output block (below, wraps) -->
+        <g class="block" data-id="drop3">
+          <rect x="500" y="205" width="82" height="50" rx="8" class="box drop"/>
+          <text x="541" y="227" text-anchor="middle" class="lbl">Dropout</text>
+          <text x="541" y="241" text-anchor="middle" class="sub">rate 0.5</text>
+        </g>
+
+        <g class="block" data-id="dense2">
+          <rect x="600" y="205" width="100" height="50" rx="8" class="box dense"/>
+          <text x="650" y="227" text-anchor="middle" class="lbl">Dense</text>
+          <text x="650" y="241" text-anchor="middle" class="sub">1, sigmoid</text>
+        </g>
+
+        <path id="arrow-dense1-drop3" class="arrow" d="M1019,170 L1019,192 L541,192 L541,203" fill="none" marker-end="url(#arrowhead)"/>
+        <line class="arrow" id="arrow-drop3-dense2" x1="582" y1="230" x2="598" y2="230"/>
+
+        <circle id="pulseDot" r="7" cx="55" cy="115" fill="var(--accent-3)" opacity="0" style="filter:drop-shadow(0 0 5px rgba(208,104,138,0.9));"/>
+      </svg>
+      <div class="legend" style="margin-top:4px;">
+        <span class="swatch" style="background:var(--accent);"></span>Convolucional
+        <span class="swatch" style="background:var(--accent-2); margin-left:12px;"></span>Pooling
+        <span class="swatch" style="background:var(--accent-3); margin-left:12px;"></span>Dropout
+        <span class="swatch" style="background:#7ab8ff; margin-left:12px;"></span>Densa
+        &nbsp;&nbsp;·&nbsp;&nbsp;click en un bloque para ver el detalle
+      </div>
+
+      <div class="formula-box" id="archInfoPanel" style="margin-top:16px; color:var(--text);">
+        Haz click en el bloque <b>Input</b> para empezar, o pulsa "Reproducir flujo".
+      </div>
+    </div>
+    <div class="card">
+      <h3>Hiperparámetros de entrenamiento</h3>
+      <div class="stat-row">
+        <div class="stat"><div class="num">Adam</div><div class="lab">optimizador</div></div>
+        <div class="stat"><div class="num">binary_crossentropy</div><div class="lab" style="font-size:11px;">función de pérdida</div></div>
+        <div class="stat"><div class="num">32</div><div class="lab">batch size</div></div>
+        <div class="stat"><div class="num">100</div><div class="lab">épocas máx. (con EarlyStopping, patience=10)</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. CLASSIC ARCHITECTURES -->
+  <section class="panel" data-panel="classics">
+    <h2 class="section-title"><span class="num">7</span> Arquitecturas clásicas — cuál usar y por qué</h2>
+    <p class="lede">Nuestra red es deliberadamente sencilla (2 bloques Conv+Pool). Así es como encaja en el árbol genealógico de las CNN que sí veréis en Transfer Learning.</p>
+
+    <div class="card">
+      <div class="controls" id="archFilterPills">
+        <button class="btn primary" data-filter="all">Todas</button>
+        <button class="btn" data-filter="clasica">Clásicas (histórico)</button>
+        <button class="btn" data-filter="eficiente">Eficientes / móvil</button>
+      </div>
+      <div class="legend">
+        <span class="swatch" style="background:var(--accent);"></span>Convolucional
+        <span class="swatch" style="background:var(--accent-2); margin-left:12px;"></span>Pooling
+        <span class="swatch" style="background:#7ab8ff; margin-left:12px;"></span>Densa / agregación
+        &nbsp;&nbsp;·&nbsp;&nbsp;mismos colores que el diagrama del punto 6
+      </div>
+    </div>
+
+    <div id="classicsGrid"></div>
+
+    <div class="card">
+      <h3>💡 ¡Regla rápida!</h3>
+      <p>Si tienes que elegir una red preentrenada para transfer learning y no sabes por dónde empezar: <b>ResNet50</b> es el "por defecto razonable" para la mayoría de problemas de clasificación de imágenes (buen balance precisión/coste, muy soportada en todas las librerías). Si el destino es un móvil o un dispositivo con pocos recursos, <b>MobileNet</b> o <b>EfficientNet-B0</b>. Si el dataset es minúsculo y las imágenes muy simples (tipo MNIST), ni siquiera hace falta transfer learning — con algo tipo LeNet-5 sobra.</p>
+    </div>
+  </section>
+
+  <!-- 8. RESULTS -->
+  <section class="panel" data-panel="results">
+    <h2 class="section-title"><span class="num">8</span> Lo que vais a ver al ejecutar vuestro propio notebook</h2>
+    <p class="lede"><span class="badge">Verificado por ejecución</span> estos números y comportamientos ya se han comprobado ejecutando el notebook real — es lo que os debería salir a vosotros también, más o menos.</p>
+    <div class="card">
+      <div class="stat-row">
+        <div class="stat"><div class="num">62.25%</div><div class="lab">Baseline Random Forest (CV accuracy)</div></div>
+        <div class="stat"><div class="num">71.90%</div><div class="lab">CNN sin barajar los datos (test accuracy)</div></div>
+        <div class="stat"><div class="num">74.00%</div><div class="lab">CNN barajando los datos (test accuracy)</div></div>
+      </div>
+      <p style="font-size:13.5px; color:var(--text-dim); margin-top:10px; margin-bottom:0;">Vuestra CNN debería quedar claramente por encima del Random Forest — si no es así, algo en la arquitectura o el entrenamiento no está bien.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="badge warn">⚠️ Cuidado con esto</span> por qué el entrenamiento sin barajar es más inestable</h3>
+      <p>Cuando llaméis a <code>model.fit(..., validation_split=0.2)</code>, Keras no elige el 20% de validación al azar: coge <b>el último 20% del array, tal cual está ordenado</b>. Como los datos de train vienen ordenados (primero todos los gatos, luego todos los perros), si no barajáis antes, ese último 20% son <b>800 imágenes que son 100% perros</b> — ni un solo gato.</p>
+      <p>¿Qué consecuencia tiene esto para vosotros? Que el <code>EarlyStopping</code> (que decide cuándo parar el entrenamiento vigilando <code>val_loss</code>) está tomando esa decisión mirando <b>solo</b> cómo de bien clasifica perros, no gatos. Por eso, si comparáis la curva de entrenamiento con y sin barajar, la versión sin barajar oscila más — no es solo "mala suerte", es una validación que no está midiendo la mitad del problema.</p>
+      <p style="font-size:13px; color:var(--accent-2);">📌 Regla para llevaros de esta práctica: si vuestros datos vienen ordenados por clase, barajad <b>antes</b> de usar <code>validation_split</code> — o mejor aún, pasad vuestro propio conjunto de validación ya barajado con <code>validation_data=(...)</code>.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="badge warn">⚠️ Cuidado con esto</span> vuestro classification_report puede no coincidir con el de un compañero</h3>
+      <p>Este notebook no fija una semilla aleatoria. Eso significa que los pesos iniciales y el orden de los batches cambian ligeramente cada vez que entrenáis — así que es totalmente normal que a vosotros os salga que el modelo detecta mejor los perros, y a la persona de al lado le salga justo lo contrario para los gatos.</p>
+      <p><b>Qué tenéis que hacer:</b> mirad vuestro propio <code>classification_report</code> y responded con vuestros números reales — ¿qué clase tiene mayor recall? ¿cuál mayor precisión? ¿qué significa eso en términos de falsos positivos y falsos negativos para el captcha? No dependáis de lo que le haya salido a otro grupo ni de lo que diga un enunciado genérico: la dirección exacta puede cambiar de una ejecución a otra, y eso también es parte de lo que hay que aprender a interpretar.</p>
+    </div>
+
+    <div class="card">
+      <h3>Cierre con vuestra propia foto — el problema del canal alpha</h3>
+      <p>Al final de la práctica probáis el modelo con una imagen que no pertenece a ningún set. Si usáis un <b>PNG</b> (en vez de un JPG), es muy probable que os salte un error al llamar a <code>model.predict()</code>.</p>
+      <p>La causa: un PNG puede traer <b>4 canales</b> en vez de 3 — los 3 de siempre (RGB) más un canal <b>alpha</b> de transparencia. Vuestra primera capa <code>Conv2D</code> se construyó para kernels de profundidad 3 (recordad la Parte 4 de esta guía), así que en cuanto le lleguen 4 canales, falla ahí mismo con un error de tipo "depth mismatch".</p>
+      <p><b>Cómo lo arregláis:</b> quitad el cuarto canal antes de predecir, por ejemplo con <code>imagen[:,:,:,:-1]</code>. Con eso, el modelo ya debería predecir sin problema sobre vuestra propia foto.</p>
+    </div>
+  </section>
+
+  <!-- 9. GLOSSARY -->
+  <section class="panel" data-panel="glossary">
+    <h2 class="section-title"><span class="num">9</span> Glosario rápido</h2>
+    <div class="card">
+      <dl class="glossary">
+        <dt>Kernel / campo perceptivo</dt>
+        <dd>Matriz de pesos que recorre la imagen (o los mapas de características) realizando la convolución.</dd>
+        <dt>Convolución discreta</dt>
+        <dd>Barrido del kernel + producto matricial elemento a elemento + suma → un valor escalar por posición.</dd>
+        <dt>Mapa de características (feature map)</dt>
+        <dd>Resultado de aplicar un filtro a toda la imagen/entrada. Tantos mapas como filtros definidos en la capa.</dd>
+        <dt>Padding</dt>
+        <dd>Relleno (normalmente ceros) añadido al borde de la entrada para poder mantener el tamaño de salida ("same") o no ("valid").</dd>
+        <dt>Stride</dt>
+        <dd>Paso con el que se desplaza el kernel entre una posición y la siguiente.</dd>
+        <dt>Max Pooling</dt>
+        <dd>Reduce la dimensionalidad quedándose con el valor máximo de cada bloque de un mapa de características.</dd>
+        <dt>Dropout</dt>
+        <dd>Apaga aleatoriamente un % de neuronas durante el entrenamiento para reducir el sobreajuste.</dd>
+        <dt>Transfer learning</dt>
+        <dd>Reutilizar una red ya entrenada (normalmente sobre ImageNet) para un nuevo problema, ajustando o reentrenando parte de sus capas.</dd>
+        <dt>ImageNet / ILSVRC</dt>
+        <dd>Dataset de ~14 millones de imágenes etiquetadas. El concurso asociado (ILSVRC) se celebró de 2010 a 2017 — 2017 fue su última edición oficial.</dd>
+        <dt>YOLO</dt>
+        <dd>Librería de detección de objetos (clasificación + localización con bounding box), distinta de una CNN de clasificación simple.</dd>
+      </dl>
+    </div>
+  </section>
+
+</main>
+
+<footer>Ayuda visual de CNN — Unidad 1 Sprint 16.</footer>
+
+<script>
+// ---------- TAB NAVIGATION ----------
+const tabs = document.querySelectorAll('#tabs button');
+const panels = document.querySelectorAll('.panel');
+tabs.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabs.forEach(b=>b.classList.remove('active'));
+    panels.forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelector(`.panel[data-panel="${btn.dataset.tab}"]`).classList.add('active');
+  });
+});
+
+// ---------- helpers ----------
+function grayColor(v){ // v 0-9 -> hex gray
+  const g = Math.round(20 + (v/9)*215);
+  const hex = g.toString(16).padStart(2,'0');
+  return `#${hex}${hex}${hex}`;
+}
+function textColorFor(v){ return v > 5 ? '#0b0e14' : '#dbe2f0'; }
+
+// ---------- 1. CHANNEL DEMO ----------
+// Imagen base usada por la demo de convolución (sección 2) y padding (sección 3)
+const baseImg = [
+  [2,3,4,7,8,9],
+  [2,3,5,7,8,9],
+  [1,2,4,6,8,9],
+  [1,2,3,6,7,8],
+  [0,1,3,5,7,8],
+  [0,1,2,4,6,7]
+];
+// Tres canales con patrones DISTINTOS entre sí (para dejar claro que cada canal
+// aporta información propia, no es el mismo dato repetido con otro color)
+const channelR = [
+  [9,8,7,6,5,4],
+  [8,7,6,5,4,3],
+  [7,6,5,4,3,2],
+  [6,5,4,3,2,1],
+  [5,4,3,2,1,0],
+  [4,3,2,1,0,0]
+];
+const channelG = [
+  [1,2,2,2,2,1],
+  [2,4,5,5,4,2],
+  [2,5,9,9,5,2],
+  [2,5,9,9,5,2],
+  [2,4,5,5,4,2],
+  [1,2,2,2,2,1]
+];
+const channelB = [
+  [0,0,1,2,3,4],
+  [0,1,2,3,4,5],
+  [1,2,3,4,5,6],
+  [2,3,4,5,6,7],
+  [3,4,5,6,7,8],
+  [4,5,6,7,8,9]
+];
+let activeChannel = 'combined';
+function renderChannelDemo(){
+  const wrap = document.getElementById('channelDemo');
+  wrap.innerHTML = '';
+  for(let r=0;r<6;r++){
+    for(let c=0;c<6;c++){
+      const cell = document.createElement('div');
+      cell.className='cell'; cell.style.width='44px'; cell.style.height='44px'; cell.style.fontSize='11px';
+      const rv = channelR[r][c], gv = channelG[r][c], bv = channelB[r][c];
+      if(activeChannel==='combined'){
+        const R = Math.round(rv/9*255), G = Math.round(gv/9*255), B = Math.round(bv/9*255);
+        cell.style.background = `rgb(${R},${G},${B})`;
+        cell.style.color = (R+G+B)/3 > 150 ? '#0b0e14' : '#f2f5fa';
+      } else {
+        const v = activeChannel==='r' ? rv : activeChannel==='g' ? gv : bv;
+        const rgbBase = activeChannel==='r' ? [255,70,70] : activeChannel==='g' ? [90,220,120] : [90,150,255];
+        const inten = v/9;
+        cell.style.background = `rgb(${Math.round(rgbBase[0]*inten)}, ${Math.round(rgbBase[1]*inten)}, ${Math.round(rgbBase[2]*inten)})`;
+        cell.style.color = inten>0.55 ? '#0b0e14' : '#dbe2f0';
+        cell.textContent = v;
+      }
+      wrap.appendChild(cell);
+    }
+  }
+  const explainBox = document.getElementById('channelExplain');
+  if(activeChannel==='combined'){
+    explainBox.textContent = 'Vista combinada: cada píxel es la terna (R,G,B) — la mezcla real de los tres canales. Esto es lo que "ve" una persona al mirar la imagen.';
+  } else {
+    const name = activeChannel==='r' ? 'ROJO' : activeChannel==='g' ? 'VERDE' : 'AZUL';
+    explainBox.textContent = `Canal ${name} aislado — cada número es la intensidad de ESE color en ese píxel (0 = nada, 9 = máximo). Fíjate en que el patrón no se parece al de los otros dos canales: cada uno es, literalmente, una matriz 2D independiente. La imagen a color final es la superposición de las tres.`;
+  }
+}
+document.querySelectorAll('#channelPills button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#channelPills button').forEach(b=>b.classList.remove('primary'));
+    btn.classList.add('primary');
+    activeChannel = btn.dataset.ch;
+    renderChannelDemo();
+  });
+});
+renderChannelDemo();
+
+// ---------- 2. CONVOLUTION DEMO ----------
+const kernels = {
+  identity: [[0,0,0],[0,1,0],[0,0,0]],
+  blur: [[1/9,1/9,1/9],[1/9,1/9,1/9],[1/9,1/9,1/9]],
+  edge: [[-1,-1,-1],[-1,8,-1],[-1,-1,-1]],
+  sharpen: [[0,-1,0],[-1,5,-1],[0,-1,0]],
+  random: null
+};
+function randomKernel(){
+  const k = [];
+  for(let i=0;i<3;i++){ k.push([]); for(let j=0;j<3;j++){ k[i].push(+( (Math.random()*2-1).toFixed(2) )); } }
+  return k;
+}
+let currentKernel = kernels.edge;
+let convState = { r:0, c:0, done:false, playing:false };
+const inputSize = 6;
+let outCoords = [];
+
+function computeOutCoords(){
+  // valid convolution, stride 1, kernel 3x3 -> output 4x4 for size 6
+  outCoords = [];
+  for(let r=0;r<=inputSize-3;r++){ for(let c=0;c<=inputSize-3;c++){ outCoords.push([r,c]); } }
+}
+computeOutCoords();
+
+function renderKernelTable(k){
+  const t = document.getElementById('kernelTable');
+  t.innerHTML='';
+  k.forEach(row=>{
+    const tr = document.createElement('tr');
+    row.forEach(v=>{
+      const td = document.createElement('td');
+      td.textContent = (typeof v === 'number') ? (Math.abs(v) < 1 && v !== 0 ? v.toFixed(2) : v) : v;
+      tr.appendChild(td);
+    });
+    t.appendChild(tr);
+  });
+}
+
+function renderConvGrids(stepIndex){
+  const inputWrap = document.getElementById('convInput');
+  inputWrap.innerHTML='';
+  const activeCells = new Set();
+  if(stepIndex >= 0 && stepIndex < outCoords.length){
+    const [r,c] = outCoords[stepIndex];
+    for(let i=0;i<3;i++) for(let j=0;j<3;j++) activeCells.add(`${r+i}_${c+j}`);
+  }
+  baseImg.forEach((row,ri)=>row.forEach((v,ci)=>{
+    const cell = document.createElement('div');
+    cell.className='cell';
+    cell.style.background = grayColor(v);
+    cell.style.color = textColorFor(v);
+    cell.textContent = v;
+    if(activeCells.has(`${ri}_${ci}`)) cell.classList.add('window');
+    inputWrap.appendChild(cell);
+  }));
+
+  const outWrap = document.getElementById('convOutput');
+  outWrap.style.gridTemplateColumns = `repeat(${inputSize-2}, 34px)`;
+  outWrap.innerHTML='';
+  for(let r=0;r<inputSize-2;r++){
+    for(let c=0;c<inputSize-2;c++){
+      const cell = document.createElement('div');
+      cell.className='cell';
+      const idx = outCoords.findIndex(([rr,cc])=>rr===r&&cc===c);
+      if(idx>=0 && idx < stepIndex){
+        const val = computeConvAt(r,c);
+        cell.style.background = grayColor(clamp09(val));
+        cell.style.color = textColorFor(clamp09(val));
+        cell.textContent = val.toFixed(1);
+      } else if(idx === stepIndex-1){
+        const val = computeConvAt(r,c);
+        cell.style.background = grayColor(clamp09(val));
+        cell.style.color = textColorFor(clamp09(val));
+        cell.textContent = val.toFixed(1);
+        cell.classList.add('out-active');
+      } else {
+        cell.style.background = '#171c27';
+        cell.style.border = '1px dashed #232938';
+      }
+      outWrap.appendChild(cell);
+    }
+  }
+}
+function clamp09(v){ return Math.max(0, Math.min(9, v)); }
+function computeConvAt(r,c){
+  let sum = 0;
+  for(let i=0;i<3;i++) for(let j=0;j<3;j++) sum += baseImg[r+i][c+j]*currentKernel[i][j];
+  return sum;
+}
+function updateFormula(stepIndex){
+  const box = document.getElementById('convFormula');
+  if(stepIndex<=0){ box.textContent='Pulsa "Siguiente paso" para empezar el barrido…'; return; }
+  const [r,c] = outCoords[stepIndex-1];
+  let terms = [];
+  for(let i=0;i<3;i++) for(let j=0;j<3;j++){
+    terms.push(`${baseImg[r+i][c+j]}×${(currentKernel[i][j]).toFixed(2)}`);
+  }
+  const val = computeConvAt(r,c);
+  box.textContent = `Posición (${r},${c}):\n` + terms.join(' + ') + `\n= ${val.toFixed(2)}  → píxel de salida`;
+}
+
+let stepIndex = 0;
+function stepConv(){
+  if(stepIndex >= outCoords.length) return;
+  stepIndex++;
+  renderConvGrids(stepIndex);
+  updateFormula(stepIndex);
+  document.getElementById('stepBtn').disabled = stepIndex >= outCoords.length;
+}
+function resetConv(){
+  stepIndex = 0;
+  convState.playing = false;
+  renderConvGrids(0);
+  updateFormula(0);
+  document.getElementById('stepBtn').disabled = false;
+}
+document.getElementById('stepBtn').addEventListener('click', stepConv);
+document.getElementById('resetConvBtn').addEventListener('click', resetConv);
+document.getElementById('playBtn').addEventListener('click', ()=>{
+  resetConv();
+  const iv = setInterval(()=>{
+    if(stepIndex >= outCoords.length){ clearInterval(iv); return; }
+    stepConv();
+  }, 450);
+});
+document.getElementById('kernelSelect').addEventListener('change', (e)=>{
+  const val = e.target.value;
+  currentKernel = val==='random' ? randomKernel() : kernels[val];
+  renderKernelTable(currentKernel);
+  resetConv();
+});
+renderKernelTable(currentKernel);
+renderConvGrids(0);
+
+// ---------- 3. PADDING/STRIDE ----------
+function renderPadding(){
+  const mode = document.getElementById('paddingSelect').value;
+  const stride = parseInt(document.getElementById('strideSelect').value);
+  const wrap = document.getElementById('padInput');
+  const size = 6;
+  const padded = mode === 'same';
+  const displaySize = padded ? size+2 : size;
+  wrap.style.gridTemplateColumns = `repeat(${displaySize}, 30px)`;
+  wrap.innerHTML='';
+  for(let r=0;r<displaySize;r++){
+    for(let c=0;c<displaySize;c++){
+      const cell = document.createElement('div');
+      cell.className='cell'; cell.style.width='30px'; cell.style.height='30px'; cell.style.fontSize='9px';
+      if(padded && (r===0 || c===0 || r===displaySize-1 || c===displaySize-1)){
+        cell.classList.add('pad'); cell.textContent='0';
+      } else {
+        const ri = padded ? r-1 : r;
+        const ci = padded ? c-1 : c;
+        const v = baseImg[ri][ci];
+        cell.style.background = grayColor(v);
+        cell.style.color = textColorFor(v);
+        cell.textContent = v;
+      }
+      wrap.appendChild(cell);
+    }
+  }
+  // output size calc
+  const effectiveSize = padded ? size+2 : size;
+  const outDim = Math.floor((effectiveSize - 3)/stride) + 1;
+  document.getElementById('padOutSize').textContent = `${outDim}×${outDim}`;
+  document.getElementById('padFormula').textContent =
+`salida = floor((entrada + 2×padding - kernel) / stride) + 1
+entrada=${size}, padding=${padded ? 1 : 0} (por lado), kernel=3, stride=${stride}
+→ (${size} + ${padded?2:0} - 3) / ${stride} + 1 = ${outDim}`;
+}
+document.getElementById('paddingSelect').addEventListener('change', renderPadding);
+document.getElementById('strideSelect').addEventListener('change', renderPadding);
+renderPadding();
+
+// ---------- 5. MAX POOLING ----------
+let poolData = [];
+function randomPoolData(){
+  poolData = [];
+  for(let i=0;i<4;i++){ poolData.push([]); for(let j=0;j<4;j++){ poolData[i].push(Math.floor(Math.random()*10)); } }
+}
+function renderPoolInput(highlightBlocks){
+  const wrap = document.getElementById('poolInput');
+  wrap.innerHTML='';
+  poolData.forEach((row,ri)=>row.forEach((v,ci)=>{
+    const cell = document.createElement('div');
+    cell.className='cell'; cell.style.width='40px'; cell.style.height='40px';
+    cell.style.background = grayColor(v);
+    cell.style.color = textColorFor(v);
+    cell.textContent = v;
+    if(highlightBlocks){
+      const br = Math.floor(ri/2), bc = Math.floor(ci/2);
+      const blockVals = [[poolData[br*2][bc*2],br*2,bc*2],[poolData[br*2][bc*2+1],br*2,bc*2+1],[poolData[br*2+1][bc*2],br*2+1,bc*2],[poolData[br*2+1][bc*2+1],br*2+1,bc*2+1]];
+      const maxVal = Math.max(...blockVals.map(x=>x[0]));
+      if(v === maxVal && !cell.dataset.marked){
+        cell.classList.add('out-active');
+        cell.dataset.marked = '1';
+      }
+    }
+    wrap.appendChild(cell);
+  }));
+}
+function renderPoolOutput(){
+  const wrap = document.getElementById('poolOutput');
+  wrap.innerHTML='';
+  for(let br=0; br<2; br++){
+    for(let bc=0; bc<2; bc++){
+      const vals = [poolData[br*2][bc*2],poolData[br*2][bc*2+1],poolData[br*2+1][bc*2],poolData[br*2+1][bc*2+1]];
+      const maxVal = Math.max(...vals);
+      const cell = document.createElement('div');
+      cell.className='cell'; cell.style.width='40px'; cell.style.height='40px';
+      cell.style.background = grayColor(maxVal);
+      cell.style.color = textColorFor(maxVal);
+      cell.textContent = maxVal;
+      wrap.appendChild(cell);
+    }
+  }
+}
+document.getElementById('poolRandomBtn').addEventListener('click', ()=>{
+  randomPoolData();
+  renderPoolInput(false);
+  document.getElementById('poolOutput').innerHTML = '';
+});
+document.getElementById('poolComputeBtn').addEventListener('click', ()=>{
+  renderPoolInput(true);
+  renderPoolOutput();
+});
+randomPoolData();
+renderPoolInput(false);
+
+// ---------- 6. ARCHITECTURE EXPLORER ----------
+const archStages = [
+  { id:'input',   cx:55,   cy:115, arrowIn:null,
+    title:'Input', cfg:'Imagen ya escalada a 0–1', shapeIn:'—', shapeOut:'32×32×3',
+    desc:'La imagen de entrada, con sus 3 canales de color, ya dividida entre 255.' },
+  { id:'conv1',   cx:182,  cy:115, arrowIn:'arrow-input-conv1',
+    title:'Conv2D · bloque 1', cfg:'64 filtros, kernel 3×3×3, activación ReLU, padding "same"', shapeIn:'32×32×3', shapeOut:'32×32×64',
+    desc:'64 kernels distintos (cada uno de profundidad 3, uno por canal) barren la imagen. Cada filtro genera un mapa de características completo.' },
+  { id:'pool1',   cx:309,  cy:115, arrowIn:'arrow-conv1-pool1',
+    title:'MaxPooling2D · bloque 1', cfg:'ventana 2×2, stride 2', shapeIn:'32×32×64', shapeOut:'16×16×64',
+    desc:'Se queda con el valor máximo de cada bloque 2×2 de cada uno de los 64 mapas. Reduce a la mitad cada dimensión espacial.' },
+  { id:'drop1',   cx:427,  cy:115, arrowIn:'arrow-pool1-drop1',
+    title:'Dropout · bloque 1', cfg:'rate = 0.25', shapeIn:'16×16×64', shapeOut:'16×16×64',
+    desc:'Apaga aleatoriamente el 25% de las activaciones en cada paso de entrenamiento, para que la red no dependa en exceso de neuronas concretas.' },
+  { id:'conv2',   cx:550,  cy:115, arrowIn:'arrow-drop1-conv2',
+    title:'Conv2D · bloque 2', cfg:'128 filtros, kernel 3×3×64, activación ReLU, padding "same"', shapeIn:'16×16×64', shapeOut:'16×16×128',
+    desc:'Punto que más cuesta: este kernel ya NO mira la imagen original, mira los 64 mapas del bloque anterior. Por eso su profundidad es 64, no 3.' },
+  { id:'pool2',   cx:677,  cy:115, arrowIn:'arrow-conv2-pool2',
+    title:'MaxPooling2D · bloque 2', cfg:'ventana 2×2, stride 2', shapeIn:'16×16×128', shapeOut:'8×8×128',
+    desc:'Segunda reducción a la mitad. La "imagen" ahora es un cubo de 8×8×128 — irreconocible visualmente, pero rico en características.' },
+  { id:'drop2',   cx:795,  cy:115, arrowIn:'arrow-pool2-drop2',
+    title:'Dropout · bloque 2', cfg:'rate = 0.25', shapeIn:'8×8×128', shapeOut:'8×8×128',
+    desc:'Segunda regularización, misma idea que el Dropout anterior.' },
+  { id:'flatten', cx:908,  cy:115, arrowIn:'arrow-drop2-flatten',
+    title:'Flatten', cfg:'sin parámetros', shapeIn:'8×8×128', shapeOut:'8192',
+    desc:'Aplana el cubo 8×8×128 (8×8×128 = 8192) en un único vector. A partir de aquí ya no hay estructura espacial: es la entrada del perceptrón multicapa de siempre.' },
+  { id:'dense1',  cx:1019, cy:115, arrowIn:'arrow-flatten-dense1',
+    title:'Dense · capa oculta', cfg:'512 unidades, activación ReLU', shapeIn:'8192', shapeOut:'512',
+    desc:'El "cabezal" MLP que ya conocíais del sprint anterior — es donde vive la mayoría de los parámetros de toda la red.' },
+  { id:'drop3',   cx:541,  cy:230, arrowIn:'arrow-dense1-drop3',
+    title:'Dropout · capa densa', cfg:'rate = 0.5 (el doble que en las convolucionales)', shapeIn:'512', shapeOut:'512',
+    desc:'Aquí el dropout es mucho más agresivo: la capa densa tiene muchísimos más parámetros que cualquier capa convolucional (que comparte pesos), así que el riesgo de sobreajuste es mayor.' },
+  { id:'dense2',  cx:650,  cy:230, arrowIn:'arrow-drop3-dense2',
+    title:'Dense · salida', cfg:'1 neurona, activación sigmoide', shapeIn:'512', shapeOut:'1',
+    desc:'Neurona de salida con sigmoide → probabilidad entre 0 y 1. ≤0.5 se interpreta como "gato", >0.5 como "perro".' },
+];
+const archById = Object.fromEntries(archStages.map(s=>[s.id, s]));
+let archIndex = -1;
+let archPlaying = false;
+let archTimer = null;
+
+function setArchInfo(stage){
+  const panel = document.getElementById('archInfoPanel');
+  panel.innerHTML = `<b style="color:var(--accent);">${stage.title}</b>\n`+
+    `${stage.cfg}\n`+
+    `forma:  ${stage.shapeIn}  →  ${stage.shapeOut}\n\n`+
+    `${stage.desc}`;
+}
+function selectArchBlock(id, opts={}){
+  const stage = archById[id];
+  if(!stage) return;
+  document.querySelectorAll('.arch-svg .block').forEach(g=>g.classList.remove('active'));
+  const g = document.querySelector(`.arch-svg .block[data-id="${id}"]`);
+  if(g) g.classList.add('active');
+  document.querySelectorAll('.arch-svg .arrow').forEach(a=>a.classList.remove('lit'));
+  if(stage.arrowIn){
+    const arrow = document.getElementById(stage.arrowIn);
+    if(arrow) arrow.classList.add('lit');
+  }
+  const dot = document.getElementById('pulseDot');
+  dot.setAttribute('cx', stage.cx);
+  dot.setAttribute('cy', stage.cy);
+  dot.setAttribute('opacity', '1');
+  setArchInfo(stage);
+  if(!opts.silent){ archIndex = archStages.findIndex(s=>s.id===id); }
+}
+document.querySelectorAll('.arch-svg .block').forEach(g=>{
+  g.addEventListener('click', ()=>{
+    stopArchAutoplay();
+    selectArchBlock(g.dataset.id);
+    updatePlayButtonLabel();
+  });
+});
+function updatePlayButtonLabel(){
+  if(archPlaying) return;
+  const btn = document.getElementById('archPlayBtn');
+  btn.textContent = (archIndex >= 0 && archIndex < archStages.length - 1)
+    ? '▶ Continuar flujo'
+    : '▶ Reproducir flujo';
+}
+function stopArchAutoplay(){
+  archPlaying = false;
+  clearInterval(archTimer);
+  updatePlayButtonLabel();
+}
+document.getElementById('archPlayBtn').addEventListener('click', ()=>{
+  if(archPlaying){ stopArchAutoplay(); return; }
+  archPlaying = true;
+  // Si ya llegamos al final del recorrido (o nunca empezamos), volvemos a empezar.
+  // Si estábamos pausados a mitad de camino, seguimos justo desde ahí.
+  if(archIndex >= archStages.length - 1){ archIndex = -1; }
+  document.getElementById('archPlayBtn').textContent = '⏸ Pausar';
+  archTimer = setInterval(()=>{
+    archIndex++;
+    if(archIndex >= archStages.length){ stopArchAutoplay(); return; }
+    selectArchBlock(archStages[archIndex].id, {silent:true});
+  }, 1300);
+});
+document.getElementById('archResetBtn').addEventListener('click', ()=>{
+  stopArchAutoplay();
+  archIndex = -1;
+  document.querySelectorAll('.arch-svg .block').forEach(g=>g.classList.remove('active'));
+  document.querySelectorAll('.arch-svg .arrow').forEach(a=>a.classList.remove('lit'));
+  document.getElementById('pulseDot').setAttribute('opacity','0');
+  document.getElementById('archInfoPanel').innerHTML = 'Haz click en el bloque <b>Input</b> para empezar, o pulsa "Reproducir flujo".';
+  updatePlayButtonLabel();
+});
+
+// ---------- 7. CLASSIC ARCHITECTURES CHEAT SHEET ----------
+
+// Helper: diagrama secuencial simple (caja -> flecha -> caja -> ...), reutiliza
+// las mismas clases CSS (.box/.conv/.pool/.dense, .lbl, .sub, .arrow) que ya
+// existen para el diagrama interactivo del punto 6 — no interactivo aquí.
+function seqDiagram(boxes, opts={}){
+  const w = opts.boxW || 84, h = opts.boxH || 62, gap = opts.gap || 8, vPad = 14;
+  const totalW = 10 + boxes.length*w + (boxes.length-1)*gap + 10;
+  const totalH = h + vPad*2;
+  let s = `<svg viewBox="0 0 ${totalW} ${totalH}" xmlns="http://www.w3.org/2000/svg" style="width:${totalW}px;height:${totalH}px;">`;
+  boxes.forEach((b,i)=>{
+    const x = 10 + i*(w+gap);
+    const y = vPad;
+    const cls = 'box' + (b.cls ? ' '+b.cls : '');
+    s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" class="${cls}"/>`;
+    s += `<text x="${x+w/2}" y="${y+h/2-(b.sub?4:-3)}" text-anchor="middle" class="lbl" style="font-size:10.5px;">${b.label}</text>`;
+    if(b.sub) s += `<text x="${x+w/2}" y="${y+h/2+11}" text-anchor="middle" class="sub" style="font-size:9px;">${b.sub}</text>`;
+    if(i>0) s += `<line x1="${x-gap}" y1="${y+h/2}" x2="${x-2}" y2="${y+h/2}" class="arrow"/>`;
+  });
+  s += `</svg>`;
+  return s;
+}
+
+// Diagramas específicos para las arquitecturas con estructura no lineal
+function inceptionDiagram(){
+  return `<svg viewBox="0 0 640 250" xmlns="http://www.w3.org/2000/svg" style="width:640px;height:250px;">
+    <rect x="255" y="10" width="130" height="42" rx="7" class="box"/>
+    <text x="320" y="36" text-anchor="middle" class="lbl" style="font-size:11px;">Entrada del módulo</text>
+
+    <rect x="15"  y="90" width="130" height="40" rx="7" class="box conv"/>
+    <text x="80" y="114" text-anchor="middle" class="lbl" style="font-size:10.5px;">Conv 1×1</text>
+
+    <rect x="175" y="90" width="130" height="40" rx="7" class="box conv"/>
+    <text x="240" y="114" text-anchor="middle" class="lbl" style="font-size:10.5px;">Conv 1×1</text>
+    <rect x="175" y="150" width="130" height="40" rx="7" class="box conv"/>
+    <text x="240" y="174" text-anchor="middle" class="lbl" style="font-size:10.5px;">Conv 3×3</text>
+    <line x1="240" y1="130" x2="240" y2="148" class="arrow"/>
+
+    <rect x="335" y="90" width="130" height="40" rx="7" class="box conv"/>
+    <text x="400" y="114" text-anchor="middle" class="lbl" style="font-size:10.5px;">Conv 1×1</text>
+    <rect x="335" y="150" width="130" height="40" rx="7" class="box conv"/>
+    <text x="400" y="174" text-anchor="middle" class="lbl" style="font-size:10.5px;">Conv 5×5</text>
+    <line x1="400" y1="130" x2="400" y2="148" class="arrow"/>
+
+    <rect x="495" y="90" width="130" height="40" rx="7" class="box pool"/>
+    <text x="560" y="114" text-anchor="middle" class="lbl" style="font-size:10.5px;">MaxPool 3×3</text>
+    <rect x="495" y="150" width="130" height="40" rx="7" class="box conv"/>
+    <text x="560" y="174" text-anchor="middle" class="lbl" style="font-size:10.5px;">Conv 1×1</text>
+    <line x1="560" y1="130" x2="560" y2="148" class="arrow"/>
+
+    <line x1="300" y1="52" x2="80"  y2="88" class="arrow"/>
+    <line x1="310" y1="52" x2="240" y2="88" class="arrow"/>
+    <line x1="335" y1="52" x2="400" y2="88" class="arrow"/>
+    <line x1="360" y1="52" x2="560" y2="88" class="arrow"/>
+
+    <rect x="15" y="205" width="610" height="34" rx="7" class="box dense"/>
+    <text x="320" y="227" text-anchor="middle" class="lbl" style="font-size:11px;">Concatenación (depth-concat) → siguiente módulo</text>
+    <line x1="80"  y1="190" x2="80"  y2="203" class="arrow"/>
+    <line x1="240" y1="190" x2="240" y2="203" class="arrow"/>
+    <line x1="400" y1="190" x2="400" y2="203" class="arrow"/>
+    <line x1="560" y1="190" x2="560" y2="203" class="arrow"/>
+  </svg>`;
+}
+function resnetDiagram(){
+  return `<svg viewBox="0 0 480 200" xmlns="http://www.w3.org/2000/svg" style="width:480px;height:200px;">
+    <rect x="10"  y="90" width="80" height="50" rx="7" class="box"/>
+    <text x="50" y="119" text-anchor="middle" class="lbl" style="font-size:10.5px;">Entrada</text>
+
+    <rect x="130" y="90" width="90" height="50" rx="7" class="box conv"/>
+    <text x="175" y="113" text-anchor="middle" class="lbl" style="font-size:10px;">Conv 3×3</text>
+    <text x="175" y="128" text-anchor="middle" class="sub" style="font-size:9px;">+ BN + ReLU</text>
+    <line x1="90" y1="115" x2="128" y2="115" class="arrow"/>
+
+    <rect x="250" y="90" width="90" height="50" rx="7" class="box conv"/>
+    <text x="295" y="113" text-anchor="middle" class="lbl" style="font-size:10px;">Conv 3×3</text>
+    <text x="295" y="128" text-anchor="middle" class="sub" style="font-size:9px;">+ BN</text>
+    <line x1="220" y1="115" x2="248" y2="115" class="arrow"/>
+
+    <circle cx="390" cy="115" r="20" class="box"/>
+    <text x="390" y="121" text-anchor="middle" class="lbl" style="font-size:15px;">+</text>
+    <line x1="340" y1="115" x2="368" y2="115" class="arrow"/>
+
+    <path d="M50,88 C50,20 390,20 390,93" fill="none" class="arrow"/>
+    <text x="220" y="18" text-anchor="middle" class="sub" style="font-size:9.5px;">atajo / identity (skip connection)</text>
+
+    <line x1="410" y1="115" x2="450" y2="115" class="arrow"/>
+    <text x="460" y="119" text-anchor="middle" class="lbl" style="font-size:10px;">ReLU</text>
+  </svg>`;
+}
+function mobilenetDiagram(){
+  return `<svg viewBox="0 0 560 190" xmlns="http://www.w3.org/2000/svg" style="width:560px;height:190px;">
+    <text x="10" y="18" class="sub" style="font-size:10.5px;">Convolución estándar (hace las dos cosas a la vez):</text>
+    <rect x="10" y="28" width="180" height="40" rx="7" class="box conv"/>
+    <text x="100" y="52" text-anchor="middle" class="lbl" style="font-size:10.5px;">Conv 3×3 (todos los canales)</text>
+
+    <text x="10" y="105" class="sub" style="font-size:10.5px;">Separable en profundidad (MobileNet) — se hace en 2 pasos más baratos:</text>
+    <rect x="10"  y="115" width="180" height="40" rx="7" class="box conv"/>
+    <text x="100" y="135" text-anchor="middle" class="lbl" style="font-size:10px;">Depthwise 3×3</text>
+    <text x="100" y="148" text-anchor="middle" class="sub" style="font-size:9px;">1 filtro por canal</text>
+
+    <line x1="190" y1="135" x2="218" y2="135" class="arrow"/>
+
+    <rect x="220" y="115" width="180" height="40" rx="7" class="box conv"/>
+    <text x="310" y="135" text-anchor="middle" class="lbl" style="font-size:10px;">Pointwise 1×1</text>
+    <text x="310" y="148" text-anchor="middle" class="sub" style="font-size:9px;">combina los canales</text>
+
+    <line x1="400" y1="135" x2="428" y2="135" class="arrow"/>
+    <rect x="430" y="115" width="120" height="40" rx="7" class="box dense"/>
+    <text x="490" y="135" text-anchor="middle" class="lbl" style="font-size:10px;">Salida</text>
+    <text x="490" y="148" text-anchor="middle" class="sub" style="font-size:9px;">~8-9× menos cálculo</text>
+  </svg>`;
+}
+function efficientnetDiagram(){
+  return `<svg viewBox="0 0 560 210" xmlns="http://www.w3.org/2000/svg" style="width:560px;height:210px;">
+    <rect x="10" y="85" width="110" height="50" rx="7" class="box"/>
+    <text x="65" y="106" text-anchor="middle" class="lbl" style="font-size:10.5px;">Red base</text>
+    <text x="65" y="121" text-anchor="middle" class="sub" style="font-size:9px;">(EfficientNet-B0)</text>
+
+    <line x1="120" y1="95"  x2="230" y2="35"  class="arrow"/>
+    <line x1="120" y1="110" x2="230" y2="110" class="arrow"/>
+    <line x1="120" y1="125" x2="230" y2="185" class="arrow"/>
+
+    <rect x="235" y="15" width="150" height="40" rx="7" class="box conv"/>
+    <text x="310" y="39" text-anchor="middle" class="lbl" style="font-size:10px;">Más profundidad</text>
+
+    <rect x="235" y="90" width="150" height="40" rx="7" class="box pool"/>
+    <text x="310" y="114" text-anchor="middle" class="lbl" style="font-size:10px;">Más anchura</text>
+
+    <rect x="235" y="165" width="150" height="40" rx="7" class="box drop"/>
+    <text x="310" y="189" text-anchor="middle" class="lbl" style="font-size:10px;">Más resolución</text>
+
+    <line x1="385" y1="35"  x2="440" y2="95"  class="arrow"/>
+    <line x1="385" y1="110" x2="440" y2="110" class="arrow"/>
+    <line x1="385" y1="185" x2="440" y2="125" class="arrow"/>
+
+    <rect x="440" y="85" width="110" height="50" rx="7" class="box dense"/>
+    <text x="495" y="105" text-anchor="middle" class="lbl" style="font-size:9.5px;">Compound scaling</text>
+    <text x="495" y="120" text-anchor="middle" class="sub" style="font-size:8.5px;">las 3 a la vez, proporcional</text>
+  </svg>`;
+}
+
+// Cifras contrastadas (rondas aproximadas — varían ligeramente según la implementación exacta)
+const classicArchs = [
+  {
+    name:'LeNet-5', year:'1998', tag:'clasica',
+    idea:'La primera CNN "moderna" — LeCun et al. 2 bloques Conv+Subsampling + 3 capas densas, pensada para dígitos escritos a mano (32×32, escala de grises).',
+    params:'~60K parámetros', input:'32×32×1',
+    use:'Referencia histórica y datasets pequeños/simples (tipo MNIST). Es literalmente el esqueleto que hemos construido hoy, escalado.',
+    diagram: seqDiagram([
+      {label:'Input', sub:'32×32×1'},
+      {label:'Conv 5×5', sub:'6 filtros', cls:'conv'},
+      {label:'Subsampling', sub:'2×2', cls:'pool'},
+      {label:'Conv 5×5', sub:'16 filtros', cls:'conv'},
+      {label:'Subsampling', sub:'2×2', cls:'pool'},
+      {label:'FC', sub:'120', cls:'dense'},
+      {label:'FC', sub:'84', cls:'dense'},
+      {label:'FC', sub:'10, softmax', cls:'dense'},
+    ], {boxW:76, boxH:58}),
+    caption:'Secuencia completa de LeNet-5 — 8 capas en total, exactamente el mismo patrón Conv→Pool que hemos construido hoy.'
+  },
+  {
+    name:'AlexNet', year:'2012', tag:'clasica',
+    idea:'La que reventó ImageNet: 5 capas conv + 3 densas, ReLU, Dropout y data augmentation. Entrenada en 2 GPUs en paralelo.',
+    params:'~60M parámetros', input:'227×227×3 (o 224×224×3 según la implementación)',
+    use:'Hoy en día casi solo tiene interés histórico/didáctico — mucho más pesada que alternativas modernas con precisión similar o peor.',
+    diagram: seqDiagram([
+      {label:'Input', sub:'227×227×3'},
+      {label:'Conv 11×11', sub:'96, s4', cls:'conv'},
+      {label:'MaxPool', sub:'3×3, s2', cls:'pool'},
+      {label:'Conv 5×5', sub:'256', cls:'conv'},
+      {label:'MaxPool', sub:'3×3, s2', cls:'pool'},
+      {label:'Conv 3×3', sub:'384', cls:'conv'},
+      {label:'Conv 3×3', sub:'384', cls:'conv'},
+      {label:'Conv 3×3', sub:'256', cls:'conv'},
+      {label:'MaxPool', sub:'3×3, s2', cls:'pool'},
+      {label:'FC', sub:'4096', cls:'dense'},
+      {label:'FC', sub:'4096', cls:'dense'},
+      {label:'FC', sub:'1000', cls:'dense'},
+    ], {boxW:76, boxH:58}),
+    caption:'12 capas — arrástrate a la derecha para ver la cola de capas densas (4096 → 4096 → 1000).'
+  },
+  {
+    name:'VGG16 / VGG19', year:'2014', tag:'clasica',
+    idea:'Filosofía "todo 3×3, apila y ya": muy uniforme y fácil de entender, pero a base de profundidad bruta.',
+    params:'~134–138M parámetros', input:'224×224×3',
+    use:'Buena para extraer features en transfer learning cuando el coste computacional no es problema — pero pesada para producción o móvil.',
+    diagram: seqDiagram([
+      {label:'Input', sub:'224×224×3'},
+      {label:'2×Conv 3×3', sub:'64', cls:'conv'},
+      {label:'MaxPool', sub:'2×2', cls:'pool'},
+      {label:'2×Conv 3×3', sub:'128', cls:'conv'},
+      {label:'MaxPool', sub:'2×2', cls:'pool'},
+      {label:'3×Conv 3×3', sub:'256', cls:'conv'},
+      {label:'MaxPool', sub:'2×2', cls:'pool'},
+      {label:'3×Conv 3×3', sub:'512', cls:'conv'},
+      {label:'MaxPool', sub:'2×2', cls:'pool'},
+      {label:'3×Conv 3×3', sub:'512', cls:'conv'},
+      {label:'MaxPool', sub:'2×2', cls:'pool'},
+      {label:'FC', sub:'4096', cls:'dense'},
+      {label:'FC', sub:'4096', cls:'dense'},
+      {label:'FC', sub:'1000', cls:'dense'},
+    ], {boxW:80, boxH:58}),
+    caption:'Cada "N×Conv 3×3" es un bloque repetido N veces con el mismo kernel — de ahí lo de "apilar y ya".'
+  },
+  {
+    name:'GoogLeNet / Inception v1', year:'2014', tag:'eficiente',
+    idea:'Módulo "Inception": convoluciones de varios tamaños (1×1, 3×3, 5×5) en paralelo, concatenadas — captura patrones a distinta escala sin disparar el número de parámetros.',
+    params:'~5–7M parámetros', input:'224×224×3',
+    use:'Cuando quieres buena precisión sin pagar el coste de VGG. El 1×1 conv como "cuello de botella" es una idea que veréis reaparecer en casi todo lo moderno.',
+    diagram: inceptionDiagram(),
+    caption:'Un único módulo Inception (se repite ~9 veces en las 22 capas totales de GoogLeNet). 4 ramas en paralelo, luego se concatenan.'
+  },
+  {
+    name:'ResNet (18/34/50/101/152)', year:'2015', tag:'eficiente',
+    idea:'Introduce las conexiones residuales (skip connections): la entrada de un bloque se suma a su salida, lo que permite entrenar redes muchísimo más profundas sin que el gradiente se desvanezca.',
+    params:'ResNet50 ~23–25M parámetros', input:'224×224×3',
+    use:'El "por defecto razonable" para transfer learning en clasificación de imágenes hoy en día — buen equilibrio precisión/coste y soportadísima en todas las librerías.',
+    diagram: resnetDiagram(),
+    caption:'Un "bloque residual": el atajo (arriba) deja pasar la entrada intacta y se suma al final — así el gradiente no se pierde aunque haya cientos de capas.'
+  },
+  {
+    name:'MobileNet (v1/v2/v3)', year:'2017', tag:'eficiente',
+    idea:'Convoluciones separables en profundidad (depthwise separable): separa el filtrado espacial de la combinación entre canales, reduciendo drásticamente el cómputo.',
+    params:'MobileNetV2 ~2–3.4M parámetros', input:'224×224×3 (configurable)',
+    use:'Cuando el destino final es un móvil, una app o un dispositivo con pocos recursos — ese es literalmente su objetivo de diseño.',
+    diagram: mobilenetDiagram(),
+    caption:'Comparación directa: una convolución estándar hace ambas cosas en un único paso caro; MobileNet las separa en dos pasos baratos.'
+  },
+  {
+    name:'EfficientNet (B0–B7)', year:'2019', tag:'eficiente',
+    idea:'"Compound scaling": en vez de escalar solo profundidad o solo resolución, escala profundidad + anchura + resolución juntas de forma proporcional.',
+    params:'EfficientNet-B0 ~4–5.3M parámetros', input:'224×224×3 (crece con cada variante B0→B7)',
+    use:'Cuando quieres exprimir al máximo la relación precisión/parámetros — de hecho iguala o supera a ResNet50 con muchos menos parámetros.',
+    diagram: efficientnetDiagram(),
+    caption:'La idea de "compound scaling": en vez de tirar solo de una palanca, se giran las tres a la vez, en la misma proporción.'
+  },
+];
+function renderClassicsGrid(filter='all'){
+  const grid = document.getElementById('classicsGrid');
+  grid.className = 'classics-grid';
+  grid.innerHTML = '';
+  classicArchs.forEach(a=>{
+    const card = document.createElement('div');
+    card.className = 'classic-card' + (filter!=='all' && a.tag!==filter ? ' hidden' : '');
+    card.dataset.tag = a.tag;
+    card.innerHTML = `
+      <h4>${a.name}</h4>
+      <div class="year">${a.year}</div>
+      <div class="idea">${a.idea}</div>
+      <div class="mini-diagram-wrap">${a.diagram}</div>
+      <div class="diagram-caption">${a.caption}</div>
+      <div class="metrics">
+        <span class="metric">${a.params}</span>
+        <span class="metric">${a.input}</span>
+      </div>
+      <div class="usecase"><b>Úsala cuando:</b> ${a.use}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+document.querySelectorAll('#archFilterPills button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#archFilterPills button').forEach(b=>b.classList.remove('primary'));
+    btn.classList.add('primary');
+    renderClassicsGrid(btn.dataset.filter);
+  });
+});
+renderClassicsGrid();
+
+</script>
+</body>
+</html>
