@@ -208,3 +208,6 @@ __marimo__/
 venv/
 
 *.env
+
+
+api_key_aemet.py
