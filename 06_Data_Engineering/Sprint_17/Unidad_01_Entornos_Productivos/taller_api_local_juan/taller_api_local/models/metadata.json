@@ -1,0 +1,22 @@
+{
+  "model_version": "20260901T185956",
+  "trained_at": "2026-09-01T18:59:56.379573+00:00",
+  "n_samples": 200,
+  "features": [
+    "TV",
+    "Radio",
+    "Newspaper"
+  ],
+  "target": "Sales",
+  "metrics": {
+    "r2": 0.8994,
+    "mae": 1.4608,
+    "rmse": 1.7816
+  },
+  "coefficients": {
+    "TV": 0.0447,
+    "Radio": 0.1892,
+    "Newspaper": 0.0028
+  },
+  "intercept": 2.9791
+}
